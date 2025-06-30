@@ -1,11 +1,21 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, View, StyleSheet } from 'react-native';
+import { getHelloMessage } from '@/apis/hello';
 
 export default function App() {
+  const [message, setMessage] = useState<string>('');
+
+  useEffect(() => {
+    const fetchHello = async () => {
+      const msg = await getHelloMessage();
+      setMessage(msg); // 상태 업데이트
+    };
+    fetchHello();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Text>Main Screen</Text>
-      <StatusBar style="auto" />
+      <Text style={styles.text}>{message || 'Loading...'}</Text>
     </View>
   );
 }
@@ -13,8 +23,10 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center'
   },
+  text: {
+    fontSize: 20
+  }
 });
