@@ -9,8 +9,8 @@
 ### 1. 프로젝트 클론
 
 ```bash
-git clone https://github.com/DOOYEE0709/nsg-frontend-template.git
-cd nsg-frontend-template
+git clone https://github.com/no-so-gong/nsg-frontend.git
+cd nsg-frontend
 ```
 
 ### 2. 의존성 설치
@@ -18,7 +18,16 @@ cd nsg-frontend-template
 npm install
 ```
 
-### 3. 실행
+### 3. 환경 변수 설정(백엔드 연동)
+`.env` 파일을 프로젝트 루트에 생성하고 아래와 같이 설정합니다:
+```bash
+# 예시
+API_URL=http://<your-ipv4-address>:8000
+```
+`<your-ipv4-address>`는 **호스트 컴퓨터의 IP 주소**입니다. <br/> Windows에서 확인 방법: 명령 프롬프트(cmd)에서 `ipconfig` 입력 → `IPv4 주소` 확인
+- ⚠️ localhost 또는 127.0.0.1은 모바일 기기에서 작동하지 않습니다.
+
+### 4. 실행
 
 🍎 iOS(Expo Go 앱 사용)
 ```bash
@@ -33,6 +42,13 @@ npx expo start --web
 ```bash
 npx expo install react-dom react-native-web @expo/metro-runtime
 ```
+<br/>
+
+```bash
+# 실행 시 캐시 초기화 (문제 발생 시 추천)
+npx expo start --clear
+```
+> 💡 앱이 이상하게 작동할 경우 이 명령어로 캐시를 초기화하세요.
 
 ## 📁 프로젝트 디렉토리 구조
 ```bash
