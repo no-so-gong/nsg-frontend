@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
-import { getHelloMessage } from '@/apis/hello';
+import { getHelloMessage } from '@/src/apis/hello';
 
 export default function App() {
   const [message, setMessage] = useState<string>('');
