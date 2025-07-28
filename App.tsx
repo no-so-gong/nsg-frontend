@@ -4,12 +4,13 @@ import { SplashScreen } from './components/SplashScreen';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { getHelloMessage } from '@/src/apis/hello';
 import useSplashStore from "./zustand/useSplashStore"; 
-import { Home } from './screens/Home';
+import useLoadingStore from './zustand/useLoadingStore';
+import { fetchWithLoading } from './utils/fetchWithLoading';
 
 export default function App() {
-   const { isSplashShown, hasShownSplash, showSplash } = useSplashStore();
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  const { isSplashShown, hasShownSplash, showSplash } = useSplashStore();
+  const { isLoading, setLoading } = useLoadingStore();
+  const [message, setMessage] = useState(''); //초기 API?
 
   useEffect(() => {
     if (!hasShownSplash) {
@@ -17,26 +18,20 @@ export default function App() {
     }
   }, [hasShownSplash, showSplash]);
 
-  //초기 API?
   useEffect(() => {
     const fetchHello = async () => {
-      const msg = await getHelloMessage();
+      const msg = await fetchWithLoading(getHelloMessage); //이런식으로 API 호출과 동시에 자동 로딩 처리
       setMessage(msg || '');
-      setLoading(false);
     };
-
     fetchHello();
   }, []);
 
-  if (isSplashShown) return <SplashScreen />;
-  if (loading) return <LoadingSpinner />;
 
+  if (isSplashShown) return <SplashScreen />;
 
   return (
     <View style={styles.container}>
-      <Home/>
-      {/* <Text style={styles.text}>{message || 'Hello!'}</Text> */}
-      <LoadingSpinner/>
+      <LoadingSpinner isVisible={isLoading} />
     </View>
   );
 }

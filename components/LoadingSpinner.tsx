@@ -2,9 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Image } from 'react-native';
 import Bone from "../assets/icon/bone.svg";
 
-export const LoadingSpinner = () => {
-  const anim = useRef(new Animated.Value(0)).current;
+interface LoadingSpinnerProps {
+  isVisible: boolean;
+}
 
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ isVisible }) => {  
+  const anim = useRef(new Animated.Value(0)).current;
+  if (!isVisible) return null; 
   useEffect(() => {
     Animated.loop(
       Animated.timing(anim, {
@@ -18,36 +22,48 @@ export const LoadingSpinner = () => {
 
   const translateX = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [-100, 250], 
+    outputRange: [-100, 250], // 게이지가 다 차도록 250까지 함
   });
 
   return (
-    <View style={styles.container}>
-     <View style={styles.titleWrapper}>
-        <View style={styles.imageWrapper}>
-          <Image source={Bone} style={styles.image} />
-          <Text style={styles.titleText}>알림</Text>
+    <View style={styles.overlay}>
+      <View style={styles.container}>
+        <View style={styles.titleWrapper}>
+          <View style={styles.imageWrapper}>
+            <Bone style={styles.image}  width={60} height={60} />
+            <Text style={styles.titleText}>알림</Text>
+          </View>
         </View>
+
+        <View style={styles.progressBar}>
+          <Animated.View
+            style={[
+              styles.stripes,
+              {
+                transform: [{ translateX }],
+              },
+            ]}
+          />
+        </View>
+
+        <Text style={styles.loadingText}>로딩 중.</Text>
       </View>
-
-
-      <View style={styles.progressBar}>
-        <Animated.View
-          style={[
-            styles.stripes,
-            {
-              transform: [{ translateX }],
-            },
-          ]}
-        />
-      </View>
-
-      <Text style={styles.loadingText}>로딩 중.</Text>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)', 
+    zIndex: 9999,
+  },
+
   container: {
     width: 280,
     height: 110,
@@ -69,19 +85,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
   },
+
   stripes: {
     height: '100%',
-    width: '150%', 
+    width: '150%',
     backgroundColor: '#ff9933',
     opacity: 0.7,
   },
+
   loadingText: {
     marginTop: 10,
     fontWeight: '700',
     color: 'white',
     fontSize: 16,
   },
-    
+
   titleWrapper: {
     position: 'absolute',
     top: -30,
@@ -111,5 +129,4 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 8,
   },
-
 });
