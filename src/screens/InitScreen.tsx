@@ -46,17 +46,20 @@ export default function InitScreen() {
 
   const handleNameComplete = async (names: { shiba: string; chick: string; duck: string }) => {
     try {
-      const userId = await createUser();
+      const response = await createUser();
+      const userId = response.userId;
       const animals = [
         { animalId: 1, name: names.shiba },
         { animalId: 2, name: names.chick },
         { animalId: 3, name: names.duck },
       ];
-      await registerNames({ userId, animals });
-      Alert.alert('등록 완료', '친구들이 등록되었습니다!');
+      const res = await registerNames({ userId, animals });
+      Alert.alert(res.message);
       // 다음 화면으로 navigation
-    } catch (err) {
-      Alert.alert('오류', '이름 저장 중 문제가 발생했어요.');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
     }
   };
 
