@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { API_URL } from '@/config/config';
-import { USER_BASE } from '../constants/endpoints';
+import { API_URL } from '@config/config';
+import { USER_BASE } from '@/constants/endpoints';
 
 export const createUser = async () => {
   try {

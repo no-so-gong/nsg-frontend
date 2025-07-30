@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Image } from 'react-native';
-import Bone from "../assets/icon/bone.svg";
+import Bone from "@assets/icon/bone.svg";
 
 interface LoadingSpinnerProps {
   isVisible: boolean;

@@ -8,10 +8,10 @@ import {
   Easing,
   Alert,
 } from 'react-native';
-import CharacterNameModal from '../components/CharacterNameModal';
-import { createUser } from '../apis/users';
-import { registerNames } from '../apis/pets';
-import { SCREEN_WIDTH, SCREEN_HEIGHT } from '../constants/dimensions';
+import CharacterNameModal from '@/components/CharacterNameModal';
+import { createUser } from '@/apis/users';
+import { registerNames } from '@/apis/pets';
+import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 
 export default function InitScreen() {
   const [modalVisible, setModalVisible] = useState(false);

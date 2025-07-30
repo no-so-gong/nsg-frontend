@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Svg, { Path, Mask, G, Text as SvgText, SvgProps } from 'react-native-svg';
-import { SCREEN_WIDTH } from '../constants/dimensions';
+import { SCREEN_WIDTH } from '@/constants/dimensions';
 
 interface BoneLabelSvgProps extends SvgProps {
   label: string;

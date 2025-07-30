@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { SCREEN_WIDTH, SCREEN_HEIGHT } from '../constants/dimensions';
+import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 
 interface Props {
   label: string;

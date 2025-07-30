@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import BoneLabelSvg from './BoneLabelSvg';
-import { SCREEN_WIDTH, SCREEN_HEIGHT } from '../constants/dimensions';
+import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import CommonButton from './CommonButton';
 
 interface Props {

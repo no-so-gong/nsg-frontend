@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { SplashScreen } from './src/components/SplashScreen';
-import { LoadingSpinner } from './src/components/LoadingSpinner';
+import { SplashScreen } from '@/components/SplashScreen';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useFonts } from 'expo-font';
-import InitScreen from './src/screens/InitScreen';
+import InitScreen from '@/screens/InitScreen';
 import useSplashStore from './zustand/useSplashStore';
 import useLoadingStore from './zustand/useLoadingStore';
 

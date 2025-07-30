@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { API_URL } from '@/config/config';
-import { PET_BASE } from '@/src/constants/endpoints';
+import { API_URL } from '@config/config';
+import { PET_BASE } from '@/constants/endpoints';
 
 interface RegisterResponse {
   message: string;
