@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { SplashScreen } from '@/components/SplashScreen';
+import { SplashScreen } from '@/screens/SplashScreen';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useFonts } from 'expo-font';
 import InitScreen from '@/screens/InitScreen';
-import useSplashStore from './zustand/useSplashStore';
-import useLoadingStore from './zustand/useLoadingStore';
+import useSplashStore from '@zustand/useSplashStore';
+import useLoadingStore from '@zustand/useLoadingStore';
 
 export default function App() {
   const { isSplashShown, hasShownSplash, showSplash } = useSplashStore();
   const { isLoading } = useLoadingStore();
 
   const [fontsLoaded] = useFonts({
-    'Dokdo-Regular': require('./assets/fonts/Dokdo-Regular.ttf'),
-    'BagelFatOne-Regular': require('./assets/fonts/BagelFatOne-Regular.ttf'),
+    'Dokdo-Regular': require('@assets/fonts/Dokdo-Regular.ttf'),
+    'BagelFatOne-Regular': require('@assets/fonts/BagelFatOne-Regular.ttf'),
   });
 
   useEffect(() => {

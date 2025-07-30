@@ -71,17 +71,17 @@ export default function InitScreen() {
       disabled={modalVisible}
     >
       <ImageBackground
-        source={require('@/assets/images/초기화면_배경.png')}
+        source={require('@assets/images/초기화면_배경.png')}
         style={styles.bg}
         resizeMode="stretch"
       >
         <Image
-          source={require('@/assets/images/노답_삼형제_이걸_키우라고.png')}
+          source={require('@assets/images/노답_삼형제_이걸_키우라고.png')}
           style={styles.title}
           resizeMode="contain"
         />
         <Image
-          source={require('@/assets/images/삼형제_싸운다.png')}
+          source={require('@assets/images/삼형제_싸운다.png')}
           style={styles.characters}
           resizeMode="contain"
         />

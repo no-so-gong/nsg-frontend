@@ -6,7 +6,7 @@ const { height, width } = Dimensions.get('window');
 
 export const SplashScreen = () => (
   <View style={styles.container}>
-    <Image source={require('../assets/image/Splash.png')} style={styles.image} />
+    <Image source={require('@assets/image/Splash.png')} style={styles.image} />
     {/* <Image
       source={Splash} 
       style={styles.image}

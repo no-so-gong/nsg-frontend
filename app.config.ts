@@ -9,23 +9,23 @@ export default {
     extra: {
       API_URL: process.env.API_URL,
     },
-    splash: {
-      image: "./assets/NSG-logo.png",
-      resizeMode: "contain",
-      backgroundColor: "#ffffff",
-    },
+    // splash: {
+    //   image: "./assets/NSG-logo.png",
+    //   resizeMode: "contain",
+    //   backgroundColor: "#ffffff",
+    // },
     ios: {
       supportsTablet: true,
     },
-    android: {
-      adaptiveIcon: {
-        foregroundImage: "./assets/NSG-logo.png",
-        backgroundColor: "#ffffff",
-      },
-      edgeToEdgeEnabled: true,
-    },
-    web: {
-      favicon: "./assets/NSG-logo.png",
-    },
+    // android: {
+    //   adaptiveIcon: {
+    //     foregroundImage: "./assets/NSG-logo.png",
+    //     backgroundColor: "#ffffff",
+    //   },
+    //   edgeToEdgeEnabled: true,
+    // },
+    // web: {
+    //   favicon: "./assets/NSG-logo.png",
+    // },
   },
 };
