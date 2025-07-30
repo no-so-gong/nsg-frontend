@@ -6,15 +6,22 @@ import { useFonts } from 'expo-font';
 import InitScreen from '@/screens/InitScreen';
 import useSplashStore from '@zustand/useSplashStore';
 import useLoadingStore from '@zustand/useLoadingStore';
+import useUserStore from '@zustand/useUserStore';
 
 export default function App() {
   const { isSplashShown, hasShownSplash, showSplash } = useSplashStore();
   const { isLoading } = useLoadingStore();
+  
+  const loadUserId = useUserStore((state) => state.loadUserId);
 
   const [fontsLoaded] = useFonts({
     'Dokdo-Regular': require('@assets/fonts/Dokdo-Regular.ttf'),
     'BagelFatOne-Regular': require('@assets/fonts/BagelFatOne-Regular.ttf'),
   });
+
+  useEffect(() => {
+    loadUserId();
+  }, []);
 
   useEffect(() => {
     if (!hasShownSplash && fontsLoaded) {

@@ -12,12 +12,16 @@ import CharacterNameModal from '@/components/CharacterNameModal';
 import { createUser } from '@/apis/users';
 import { registerNames } from '@/apis/pets';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
+import useUserStore from '@zustand/useUserStore';
 
 export default function InitScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const opacity = useState(new Animated.Value(0.3))[0];
   console.log('SCREEN_WIDTH:', SCREEN_WIDTH);
   console.log('SCREEN_HEIGHT:', SCREEN_HEIGHT);
+
+  const userId = useUserStore((state) => state.userId);
+  const setUserId = useUserStore((state) => state.setUserId);
 
   useEffect(() => {
     Animated.loop(
@@ -39,7 +43,9 @@ export default function InitScreen() {
   }, [opacity]);
 
   const handlePressAnywhere = () => {
-    if (!modalVisible) {
+    if (userId) {
+      Alert.alert('넌 이미 userId가 있다!'); // 추후 다음 화면으로 navigation
+    } else if (!modalVisible) {
       setModalVisible(true);
     }
   };
@@ -54,6 +60,7 @@ export default function InitScreen() {
         { animalId: 3, name: names.duck },
       ];
       const res = await registerNames({ userId, animals });
+      await setUserId(userId);
       Alert.alert(res.message);
       // 다음 화면으로 navigation
     } catch (error: unknown) {
