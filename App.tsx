@@ -1,24 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import InitScreen from '@/src/screens/InitScreen';
+import { View, StyleSheet } from 'react-native';
+import { SplashScreen } from './src/components/SplashScreen';
+import { LoadingSpinner } from './src/components/LoadingSpinner';
 import { useFonts } from 'expo-font';
+import InitScreen from './src/screens/InitScreen';
+import useSplashStore from './zustand/useSplashStore';
+import useLoadingStore from './zustand/useLoadingStore';
 
 export default function App() {
+  const { isSplashShown, hasShownSplash, showSplash } = useSplashStore();
+  const { isLoading } = useLoadingStore();
+
   const [fontsLoaded] = useFonts({
     'Dokdo-Regular': require('./assets/fonts/Dokdo-Regular.ttf'),
     'BagelFatOne-Regular': require('./assets/fonts/BagelFatOne-Regular.ttf'),
-  }); // splash 완성 후 적용 → 폰트 로드 되면 splash 사라지게
+  });
 
-  return <InitScreen/>
+  useEffect(() => {
+    if (!hasShownSplash && fontsLoaded) {
+      showSplash();
+    }
+  }, [hasShownSplash, showSplash, fontsLoaded]);
+
+  if (!fontsLoaded || isSplashShown) {
+    return <SplashScreen />;
+  }
+
+  return (
+    <View style={styles.container}>
+      <LoadingSpinner isVisible={isLoading} />
+      <InitScreen />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  text: {
-    fontSize: 20
-  }
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  text: { fontSize: 20 },
 });
