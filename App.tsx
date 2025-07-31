@@ -1,32 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import { getHelloMessage } from '@/apis/hello';
+import { View, StyleSheet } from 'react-native';
+import { SplashScreen } from '@/screens/SplashScreen';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { useFonts } from 'expo-font';
+import InitScreen from '@/screens/InitScreen';
+import useSplashStore from '@zustand/useSplashStore';
+import useLoadingStore from '@zustand/useLoadingStore';
+import useUserStore from '@zustand/useUserStore';
 
 export default function App() {
-  const [message, setMessage] = useState<string>('');
+  const { isSplashShown, hasShownSplash, showSplash } = useSplashStore();
+  const { isLoading } = useLoadingStore();
+  
+  const loadUserId = useUserStore((state) => state.loadUserId);
+
+  const [fontsLoaded] = useFonts({
+    'Dokdo-Regular': require('@assets/fonts/Dokdo-Regular.ttf'),
+    'BagelFatOne-Regular': require('@assets/fonts/BagelFatOne-Regular.ttf'),
+  });
 
   useEffect(() => {
-    const fetchHello = async () => {
-      const msg = await getHelloMessage();
-      setMessage(msg); // 상태 업데이트
-    };
-    fetchHello();
+    loadUserId();
   }, []);
+
+  useEffect(() => {
+    if (!hasShownSplash && fontsLoaded) {
+      showSplash();
+    }
+  }, [hasShownSplash, showSplash, fontsLoaded]);
+
+  if (!fontsLoaded || isSplashShown) {
+    return <SplashScreen />;
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{message || 'Loading...'}</Text>
+      <LoadingSpinner isVisible={isLoading} />
+      <InitScreen />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  text: {
-    fontSize: 20
-  }
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  text: { fontSize: 20 },
 });
