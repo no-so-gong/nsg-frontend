@@ -84,7 +84,7 @@ nsg-frontend/
 ├── zustand/                   # 전역 상태 관리
 │   │   ├── useLoadingStore.ts      # 로딩 상태 저장/관리 
 │   │   ├── useSplashStore.ts      # 스플래시 상태 저장/관리 
-│   └── useUserStore.ts        # userId 상태 저장 및 AsyncStorage 연동
+│   └── ├── useUserStore.ts        # userId 상태 저장 및 AsyncStorage 연동
 │
 ├── App.tsx                    # 앱 진입점
 ├── app.config.ts              # Expo 설정 파일
