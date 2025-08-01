@@ -1,6 +1,6 @@
 ---
-name: nsg-frontend issue template
-about: '노소공 '
+name: "\U0001F4A9nsg-frontend issue template\U0001F4A9"
+about: "\U0001F4A9\U0001F4A9\U0001F4A9노소공\U0001F4A9\U0001F4A9\U0001F4A9 "
 title: ''
 labels: ''
 assignees: ''
