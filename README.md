@@ -52,18 +52,50 @@ npx expo start --clear
 
 ## 📁 프로젝트 디렉토리 구조
 ```bash
-nsg-frontend-template/
-├── assets/                  # 앱에서 사용하는 이미지, 아이콘 등
-│   └── NSG-logo.png
+nsg-frontend/
+├── assets/                    # 앱에서 사용하는 정적 리소스
+│   ├── fonts/                 # 커스텀 폰트
+│   ├── icons/                 # SVG 아이콘 (예: bone.svg)
+│   └── images/                # PNG 및 SVG 이미지
 │
-├── App.tsx                  # 앱 진입점
-├── app.json                 # Expo 설정 파일
-├── .env                     # 환경 변수 파일 (.gitignore에 의해 Git 추적 제외)
-├── .env.example             # 환경 변수 예시 파일
-├── .gitignore               # Git 추적 제외 설정
-├── package.json             # 의존성 및 스크립트 정의
-├── package-lock.json
-├── tsconfig.json            # TypeScript 설정
-├── index.ts
-└── README.md                # 프로젝트 설명 문서
+├── src/                       # 주요 기능 구현 소스
+│   ├── apis/                  # API 요청 함수 정의
+│   │   ├── pets.ts            
+│   │   └── users.ts           
+│   │
+│   ├── components/            # 공통 UI 컴포넌트
+│   │   ├── BoneLabelSvg.tsx
+│   │   ├── CharacterNameModal.tsx
+│   │   ├── CommonButton.tsx 
+│   │   ├── LoadingSpinner.tsx 
+│   │   └── SplashScreen.tsx
+│   │
+│   ├── constants/             # 전역 상수
+│   │   ├── dimensions.ts      # 반응형 width/height 상수
+│   │   └── endpoints.ts       # API 엔드포인트 정의
+│   │
+│   ├── screens/               # 화면 단위 구성
+│   │   ├── InitScreen.tsx     # 앱 첫 진입 화면 + UUID 생성 + 이름 등록
+│   │   └── SplashScreen.tsx       # 스플래시 화면
+│
+├── utils/                     # 유틸 함수 및 헬퍼 모음
+│   │   └── InitScreen.tsx  # 로딩 화면 API 호출 시 자동 처리
+│
+├── zustand/                   # 전역 상태 관리
+│   │   ├── useLoadingStore.ts      # 로딩 상태 저장/관리 
+│   │   ├── useSplashStore.ts      # 스플래시 상태 저장/관리 
+│   └── useUserStore.ts        # userId 상태 저장 및 AsyncStorage 연동
+│
+├── App.tsx                    # 앱 진입점
+├── app.config.ts              # Expo 설정 파일
+├── babel.config.js            # Babel 설정
+├── declarations.d.ts          # SVG 및 기타 타입 선언
+├── index.ts                   # 앱 실행 엔트리포인트
+├── metro.config.js            # Metro 번들러 설정
+├── .env.example               # 환경 변수 예시
+├── .gitignore                 # Git 추적 제외 설정
+├── package.json               # 프로젝트 메타 및 의존성
+├── package-lock.json          # lock 파일
+└── tsconfig.json              # TypeScript 설정
+
 ```
