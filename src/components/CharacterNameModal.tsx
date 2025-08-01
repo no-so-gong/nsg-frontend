@@ -18,7 +18,7 @@ interface Props {
   onComplete: (names: { shiba: string, chick: string, duck: string }) => void;
 }
 
-export default function CharacterIntroModal({ visible, names, onComplete }: Props) {
+export default function CharacterNameModal({ visible, names, onComplete }: Props) {
   const [localNames, setLocalNames] = useState(names);
 
   const handleChange = (key: keyof typeof localNames, value: string) => {
