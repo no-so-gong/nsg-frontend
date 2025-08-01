@@ -1,18 +1,38 @@
 import React from 'react';
-import { View, Image, StyleSheet, ImageBackground, Text } from 'react-native';
+import { View, ImageBackground, StyleSheet } from 'react-native';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
+import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
 
 export default function MainScreen() {
   return (
     <ImageBackground
-      source={require('@assets/images/Main.png')} // 파일명을 여기에 맞게
+      source={require('@assets/images/Main.png')}
       style={styles.background}
-      resizeMode="cover" // 또는 stretch, contain
+      resizeMode="cover"
     >
-      {/* 여기에 컴포넌트들을 자유롭게 배치 */}
-      {/* <View style={styles.overlay}>
-        <Text style={styles.title}>곧 등장할 UI</Text>
-      </View> */}
+      {/* 상단 게이지들 */}
+      <View style={styles.gaugeRow}>
+        {/* 감정 게이지 - 좌측 */}
+        <View style={styles.leftGauge}>
+          <EmotionAffinityGauge
+            value={90}
+            icon={require('@assets/icons/heart.png')}
+          />
+        </View>
+
+        {/* 편애도 게이지 - 중앙 */}
+        <View style={styles.centerGauge}>
+          <EmotionAffinityGauge
+            value={80}
+            icon={require('@assets/icons/friend.png')}
+          />
+        </View>
+
+        {/* 보유 돈 컴포넌트 자리 - 우측 */}
+        <View style={styles.rightGauge}>
+          {/* 추후: 보유 돈 표시 컴포넌트 */}
+        </View>
+      </View>
     </ImageBackground>
   );
 }
@@ -22,21 +42,27 @@ const styles = StyleSheet.create({
     flex: 1,
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    justifyContent: 'flex-end', // 필요에 따라 변경
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
-  overlay: {
-    width: '90%',
-    height: '30%',
-    backgroundColor: 'rgba(255, 255, 255, 0.4)', // 예시: 반투명 박스
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
+  gaugeRow: {
+    flexDirection: 'row',
+    width: SCREEN_WIDTH,
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+  leftGauge: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  centerGauge: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  rightGauge: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
 });
