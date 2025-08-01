@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { RootStackParamList } from '@/types/navigationTypes';
 import { View, StyleSheet } from 'react-native';
 import { SplashScreen } from '@/screens/SplashScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useFonts } from 'expo-font';
 import InitScreen from '@/screens/InitScreen';
+import MainScreen from '@/screens/MainScreen';
 import useSplashStore from '@zustand/useSplashStore';
 import useLoadingStore from '@zustand/useLoadingStore';
 import useUserStore from '@zustand/useUserStore';
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   const { isSplashShown, hasShownSplash, showSplash } = useSplashStore();
@@ -34,10 +40,13 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
+    <NavigationContainer>
       <LoadingSpinner isVisible={isLoading} />
-      <InitScreen />
-    </View>
+      <Stack.Navigator initialRouteName="InitScreen" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="InitScreen" component={InitScreen} />
+        <Stack.Screen name="MainScreen" component={MainScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
