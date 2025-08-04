@@ -14,7 +14,10 @@ module.exports = function (api) {
         'module-resolver',
         {
           alias: {
-            '@': './',
+            '@': './src',
+            '@config': './config',
+            '@assets': './assets',
+            '@zustand': './zustand',
           },
         },
       ],
