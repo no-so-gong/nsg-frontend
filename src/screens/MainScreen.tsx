@@ -6,7 +6,50 @@ import MoneyStatus from '@/components/MoneyStatus';
 import BoneLabelSvg from '@/components/BoneLabelSvg';
 import IconActionButton from '@/components/IconActionButton';
 
+import { useEffect, useState } from 'react';
+import useUserStore from '@zustand/useUserStore';
+import { getPetInfo, PetInfo } from '@/apis/pets';
+
 export default function MainScreen() {
+
+  const userId = useUserStore((state) => state.userId);
+  const [shibaInfo, setShibaInfo] = useState<PetInfo | null>(null);
+  const [duckInfo, setDuckInfo] = useState<PetInfo | null>(null);
+  const [chickInfo, setChickInfo] = useState<PetInfo | null>(null);
+  // 추후에 해당 화면의 animalId에 따라 Info를 선택해서 currentPetInfo에 주입
+  // const getCurrentPetInfo = (animalId: number): PetInfo | null => {
+  //   switch (animalId) {
+  //     case 1: return shibaInfo;
+  //     case 2: return duckInfo;
+  //     case 3: return chickInfo;
+  //     default: return null;
+  //   }
+  // };
+  // const currentPetInfo = getCurrentPetInfo(currentAnimalId);
+
+  useEffect(() => {
+    const fetchPetInfos = async () => {
+      if (!userId) return;
+      // console.log(userId);
+
+      try {
+        const [shiba, duck, chick] = await Promise.all([
+          getPetInfo({ animalId: 1, userId }), // 시바견 
+          getPetInfo({ animalId: 2, userId }), // 오리
+          getPetInfo({ animalId: 3, userId }), // 병아리
+        ]);
+
+        setShibaInfo(shiba);
+        setDuckInfo(duck);
+        setChickInfo(chick);
+      } catch (error) {
+        console.error('동물 정보 불러오기 실패:', error);
+      }
+    };
+
+    fetchPetInfos();
+  }, [userId]); // 현재는 userId가 변경되었을 때만 api 재호출(추후에는 care가 일어나는 것도 감지해서 해야함)
+
   return (
     <ImageBackground
       source={require('@assets/images/Main.png')}
@@ -18,7 +61,7 @@ export default function MainScreen() {
         {/* 감정 게이지 - 좌측 */}
         <View style={styles.leftGauge}>
           <EmotionAffinityGauge
-            value={90} // 추후: api/v1/pets/{animalId} api 에서 값 가져옴
+            value={shibaInfo?.currentEmotion ? Math.floor(shibaInfo.currentEmotion) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
             icon={require('@assets/icons/heart.png')} // 현재 기분
           />
         </View>
@@ -26,7 +69,7 @@ export default function MainScreen() {
         {/* 편애도 게이지 - 중앙 */}
         <View style={styles.centerGauge}>
           <EmotionAffinityGauge
-            value={80} // 추후: api/v1/pets/{animalId} api 에서 값 가져옴
+            value={shibaInfo?.userPatternBias ? Math.floor(shibaInfo.userPatternBias * 100) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
             icon={require('@assets/icons/friend.png')} // 편애도
           />
         </View>
@@ -43,7 +86,7 @@ export default function MainScreen() {
       {/* 유저 버튼 및 게임 버튼 */}
       <View style={styles.userGameWrapper}>
         <BoneLabelSvg
-          label='임채현'
+          label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
           widthRatio={0.2}
           style={styles.userName}
         />
