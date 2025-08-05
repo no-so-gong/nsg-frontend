@@ -7,7 +7,7 @@ interface Reward {
   amount: number;
 }
 
-interface AttendanceDay {
+export interface AttendanceDay {
   day: number;
   reward: number;
   checkedIn: boolean;
