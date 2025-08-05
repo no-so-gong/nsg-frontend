@@ -11,7 +11,7 @@ import useUserStore from '@zustand/useUserStore';
 export default function App() {
   const { isSplashShown, hasShownSplash, showSplash } = useSplashStore();
   const { isLoading } = useLoadingStore();
-  
+
   const loadUserId = useUserStore((state) => state.loadUserId);
 
   const [fontsLoaded] = useFonts({
