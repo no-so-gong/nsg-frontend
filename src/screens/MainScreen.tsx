@@ -9,10 +9,15 @@ import IconActionButton from '@/components/IconActionButton';
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
 import { getPetInfo, PetInfo } from '@/apis/pets';
+import { getUserProperty } from '@/apis/users';
 
 export default function MainScreen() {
 
+  // 사용자 info
   const userId = useUserStore((state) => state.userId);
+  const [money, setMoney] = useState<number>(0);
+
+  // 동물 info
   const [shibaInfo, setShibaInfo] = useState<PetInfo | null>(null);
   const [duckInfo, setDuckInfo] = useState<PetInfo | null>(null);
   const [chickInfo, setChickInfo] = useState<PetInfo | null>(null);
@@ -27,11 +32,11 @@ export default function MainScreen() {
   // };
   // const currentPetInfo = getCurrentPetInfo(currentAnimalId);
 
+  // 동물의 info에 정보 불러오기
   useEffect(() => {
     const fetchPetInfos = async () => {
       if (!userId) return;
       // console.log(userId);
-
       try {
         const [shiba, duck, chick] = await Promise.all([
           getPetInfo({ animalId: 1, userId }), // 시바견 
@@ -48,7 +53,23 @@ export default function MainScreen() {
     };
 
     fetchPetInfos();
-  }, [userId]); // 현재는 userId가 변경되었을 때만 api 재호출(추후에는 care가 일어나는 것도 감지해서 해야함)
+  }, [userId]); // 현재는 userId가 변경되었을 때만 api 재호출(추후에는 care가 일어나는 것도 감지해서 호출)
+
+  // 사용자의 보유 돈 불러오기
+  useEffect(() => {
+    const fetchMoney = async () => {
+      if (!userId) return;
+
+      try {
+        const userProperty = await getUserProperty(userId);
+        setMoney(userProperty.money);
+      } catch (error) {
+        console.error('골드 조회 실패:', error);
+      }
+    };
+
+    fetchMoney();
+  }, [userId]); // 현재는 userId가 변경되었을 때만 api 재호출(추후에는 돈이 사용되는 것을 감지해서 호출)
 
   return (
     <ImageBackground
@@ -77,7 +98,7 @@ export default function MainScreen() {
         {/* 보유 돈 컴포넌트 자리 - 우측 */}
         <View style={styles.rightGauge}>
           <MoneyStatus
-            value={486}
+            value={money}
             icon={require('@assets/icons/money.png')}
           />
         </View>
