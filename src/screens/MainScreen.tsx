@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, ImageBackground, StyleSheet } from 'react-native';
+import { View, ImageBackground, StyleSheet, Image } from 'react-native';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
 import MoneyStatus from '@/components/MoneyStatus';
 import BoneLabelSvg from '@/components/BoneLabelSvg';
+import IconActionButton from '@/components/IconActionButton';
 
 export default function MainScreen() {
   return (
@@ -46,11 +47,42 @@ export default function MainScreen() {
           widthRatio={0.2}
           style={styles.userName}
         />
-        {/* <Image
-          source={require('@assets/icons/game-button.png')} // "게임" 아이콘
+        <IconActionButton
+          icon={require('@assets/icons/game.png')} // "게임" 아이콘
+          // onPress={() => setVisibleModal('game')} // 추후에 누르면, 게임 진입 화면 나오기
+          iconSize={60}
           style={styles.gameIcon}
-        />*/}
+        />
       </View>
+
+      {/* 중앙에 시바견 이미지 */}
+      <View style={styles.animalWrapper}>
+        <Image
+          source={require('@assets/images/shiba_image4.png')} // 추후에는 컴포넌트로 동물 타입, 현재 기분 넘겨주면 알맞는 이미지가 나오도록 수정 예정
+          style={styles.animalImage}
+          resizeMode="contain"
+        />
+      </View>
+
+      {/* 하단 액션 버튼들 */}
+      <View style={styles.actionButtonRow}>
+        <IconActionButton
+          icon={require('@assets/icons/play.png')}
+          iconSize={92}
+        // onPress={() => setVisibleModal('play')} // 추후에 누르면, 놀기 카테고리 화면 나오기
+        />
+        <IconActionButton
+          icon={require('@assets/icons/feed.png')}
+          iconSize={92}
+        // onPress={() => setVisibleModal('feed')} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
+        />
+        <IconActionButton
+          icon={require('@assets/icons/gift.png')}
+          iconSize={92}
+        // onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
+        />
+      </View>
+
 
     </ImageBackground>
   );
@@ -93,5 +125,26 @@ const styles = StyleSheet.create({
   },
   userName: {
     marginLeft: -14
-  }
+  },
+  gameIcon: {
+    marginLeft: -14
+  },
+  actionButtonRow: {
+    position: 'absolute',
+    bottom: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: SCREEN_WIDTH,
+    paddingHorizontal: 32,
+  },
+  animalWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  animalImage: {
+    width: SCREEN_WIDTH * 0.8,
+    height: SCREEN_WIDTH * 0.8,
+  },
 });
