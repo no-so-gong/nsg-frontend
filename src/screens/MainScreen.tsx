@@ -3,6 +3,7 @@ import { View, ImageBackground, StyleSheet } from 'react-native';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
 import MoneyStatus from '@/components/MoneyStatus';
+import BoneLabelSvg from '@/components/BoneLabelSvg';
 
 export default function MainScreen() {
   return (
@@ -37,6 +38,20 @@ export default function MainScreen() {
           />
         </View>
       </View>
+
+      {/* 유저 버튼 및 게임 버튼 */}
+      <View style={styles.userGameWrapper}>
+        <BoneLabelSvg
+          label='임채현'
+          widthRatio={0.2}
+          style={styles.userName}
+        />
+        {/* <Image
+          source={require('@assets/icons/game-button.png')} // "게임" 아이콘
+          style={styles.gameIcon}
+        />*/}
+      </View>
+
     </ImageBackground>
   );
 }
@@ -69,4 +84,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-end',
   },
+  userGameWrapper: {
+    position: 'absolute',
+    top: 110,
+    left: 24,
+    alignItems: 'center',
+    gap: 10,
+  },
+  userName: {
+    marginLeft: -14
+  }
 });

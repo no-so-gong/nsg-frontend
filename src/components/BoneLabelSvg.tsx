@@ -4,11 +4,13 @@ import { SCREEN_WIDTH } from '@/constants/dimensions';
 
 interface BoneLabelSvgProps extends SvgProps {
   label: string;
+  widthRatio?: number;
 }
 
-export default function BoneLabelSvg({ label, ...props }: BoneLabelSvgProps) {
-  const width = SCREEN_WIDTH * 0.25;
+export default function BoneLabelSvg({ label, widthRatio = 0.25, ...props }: BoneLabelSvgProps) {
+  const width = SCREEN_WIDTH * widthRatio;
   const height = width * (50 / 94);
+   const fontSize = SCREEN_WIDTH * widthRatio * 0.17; // 비율에 맞게 텍스트 크기 축소
   return (
     <Svg
       width={width}
@@ -47,7 +49,7 @@ export default function BoneLabelSvg({ label, ...props }: BoneLabelSvgProps) {
       <SvgText
         x={94 / 2}
         y={32}
-        fontSize={SCREEN_WIDTH * 0.043}
+        fontSize={fontSize}
         textAnchor="middle"
         stroke="#CBA74E"
         strokeWidth={1}
