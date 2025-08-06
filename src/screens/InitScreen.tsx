@@ -52,8 +52,6 @@ export default function InitScreen() {
 
   const handlePressAnywhere = () => {
     if (userId) {
-      Alert.alert('넌 이미 userId가 있다!'); 
-      // 추후 다음 화면으로 navigation
       navigation.navigate('MainScreen');
     } else if (!modalVisible) {
       setModalVisible(true);
