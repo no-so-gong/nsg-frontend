@@ -12,6 +12,17 @@ interface RegisterResponse {
   status: number;
 }
 
+export interface PetInfo {
+  animalId: number;
+  name: string;
+  currentEmotion: number;
+  evolutionStage: number;
+  isRunaway: boolean;
+  birthday: string;
+  userPatternBias: number;
+  daySinceLastCare: number;
+}
+
 export const registerNames = async ({
   userId,
   animals,
@@ -37,6 +48,32 @@ export const registerNames = async ({
       throw new Error(error.message);
     } else {
       throw new Error('동물 등록 실패: 알 수 없는 에러');
+    }
+  }
+};
+
+export const getPetInfo = async ({
+  animalId,
+  userId,
+}: {
+  animalId: number;
+  userId: string;
+}): Promise<PetInfo> => {
+  try {
+    const response = await axios.get<PetInfo>(
+      `${API_URL}${PET_BASE}/${animalId}`,
+      {
+        headers: {
+          'user-id': userId,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('동물 정보 조회 실패: 알 수 없는 에러');
     }
   }
 };
