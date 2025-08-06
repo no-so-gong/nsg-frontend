@@ -8,11 +8,6 @@ import {
   Easing,
   Alert,
 } from 'react-native';
-
-import { RootStackParamList } from '@/types/navigationTypes';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import CharacterNameModal from '@/components/CharacterNameModal';
 import { createUser } from '@/apis/users';
 import { registerNames } from '@/apis/pets';
@@ -22,9 +17,6 @@ import useUserStore from '@zustand/useUserStore';
 export default function InitScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const opacity = useState(new Animated.Value(0.3))[0];
-
-  type InitScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'InitScreen'>;
-  const navigation = useNavigation<InitScreenNavigationProp>();
   console.log('SCREEN_WIDTH:', SCREEN_WIDTH);
   console.log('SCREEN_HEIGHT:', SCREEN_HEIGHT);
 
@@ -52,7 +44,7 @@ export default function InitScreen() {
 
   const handlePressAnywhere = () => {
     if (userId) {
-      navigation.navigate('MainScreen');
+      Alert.alert('넌 이미 userId가 있다!'); // 추후 다음 화면으로 navigation
     } else if (!modalVisible) {
       setModalVisible(true);
     }
@@ -70,9 +62,7 @@ export default function InitScreen() {
       const res = await registerNames({ userId, animals });
       await setUserId(userId);
       Alert.alert(res.message);
-      
       // 다음 화면으로 navigation
-      navigation.navigate('MainScreen');
     } catch (error: unknown) {
       if (error instanceof Error) {
         Alert.alert(error.message);
