@@ -35,13 +35,7 @@ export const getAttendanceBoard = async (userId: string): Promise<AttendanceResp
     });
     return response.data;
   } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || '출석 정보 조회 실패');
-    } else if (error instanceof Error) {
-      throw new Error(error.message);
-    } else {
-      throw new Error('출석 정보 조회 실패: 알 수 없는 에러');
-    }
+    throw error;
   }
 };
 
@@ -55,12 +49,6 @@ export const postAttendanceCheckin = async (userId: string): Promise<AttendanceR
     });
     return response.data;
   } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || '출석 체크 실패');
-    } else if (error instanceof Error) {
-      throw new Error(error.message);
-    } else {
-      throw new Error('출석 체크 실패: 알 수 없는 에러');
-    }
+    throw error;
   }
 };

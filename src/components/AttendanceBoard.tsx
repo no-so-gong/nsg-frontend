@@ -8,6 +8,7 @@ import { getAttendanceBoard, postAttendanceCheckin } from '@/apis/events';
 import type { AttendanceDay } from '@/apis/events';
 import useUserStore from '@zustand/useUserStore';
 import { LoadingSpinner } from './LoadingSpinner';
+import axios from 'axios';
 
 interface AttendanceBoardProps {
   onClose: () => void;
@@ -27,17 +28,18 @@ export default function AttendanceBoard({ onClose }: AttendanceBoardProps) {
         const response = await getAttendanceBoard(userId);
         setBoard(response.data.board);
       } catch (error: any) {
-        console.error('출석 데이터 불러오기 실패', error);
+        if (axios.isAxiosError(error) && error.response) {
+          const { status, message } = error.response.data;
 
-        const status = error.response?.status;
-        const message = error.response?.data?.message;
-
-        if (status === 401) {
-          Alert.alert('인증 오류', '유저 정보가 확인되지 않아요. 앱을 다시 시작해 주세요!');
-        } else if (status === 500) {
-          Alert.alert('서버 오류', '앗! 서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.');
+          if (status === 401) {
+            Alert.alert('인증 오류', '유저 정보가 확인되지 않아요. 앱을 다시 시작해 주세요!');
+          } else if (status === 500) {
+            Alert.alert('서버 오류', '앗! 서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.');
+          } else {
+            Alert.alert('출석 정보 오류', message || '출석 정보를 불러오는 중 문제가 발생했어요ㅠㅠ');
+          }
         } else {
-          Alert.alert('출석 정보 오류', '출석 정보를 불러오는 중 문제가 발생했어요ㅠㅠ');
+          Alert.alert('출석 정보 오류', '출석 정보를 불러오는 중 알 수 없는 오류가 발생했어요.');
         }
       } finally {
         setIsLoading(false);
@@ -55,19 +57,21 @@ export default function AttendanceBoard({ onClose }: AttendanceBoardProps) {
       Alert.alert('출석 완료', `${response.data.todayReward.amount} 코인을 받았어요!`);
       onClose();
     } catch (error: any) {
-      console.error('출석 실패', error);
+      if (axios.isAxiosError(error) && error.response) {
+        const { status, message } = error.response.data;
 
-      const status = error.response?.status;
-      const message = error.response?.data?.message;
-      if (status === 401) {
-        Alert.alert('인증 오류', '유저 정보가 확인되지 않아요. 앱을 다시 시작해 주세요!');
-      } else if (status === 409) {
-        Alert.alert('이미 출석했어요!', '오늘은 이미 출석을 완료했어요.');
-        onClose();
-      } else if (status === 500) {
-        Alert.alert('서버 오류', '앗! 서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.');
+        if (status === 401) {
+          Alert.alert('인증 오류', '유저 정보가 확인되지 않아요. 앱을 다시 시작해 주세요!');
+        } else if (status === 409) {
+          Alert.alert('이미 출석했어요!', '오늘은 이미 출석을 완료했어요.');
+          onClose();
+        } else if (status === 500) {
+          Alert.alert('서버 오류', '앗! 서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.');
+        } else {
+          Alert.alert('출석 실패', message || '출석 체크 중 알 수 없는 문제가 발생했어요ㅠㅠ');
+        }
       } else {
-        Alert.alert('출석 실패', '출석 체크 중 알 수 없는 문제가 발생했어요ㅠㅠ');
+        Alert.alert('출석 실패', '네트워크 또는 알 수 없는 오류가 발생했어요.');
       }
     }
   };
