@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, Modal } from 'react-native';
 import BoneLabelSvg from './BoneLabelSvg';
 import CommonButton from './CommonButton';
 import MoneyIcon from '@assets/icons/money.svg';
@@ -72,36 +72,46 @@ export default function AttendanceBoard({ onClose }: AttendanceBoardProps) {
     }
   };
 
-  return isLoading ? (
-    <LoadingSpinner isVisible={true} />
-  ) : (
-    <View style={styles.overlay}>
-      <View style={styles.container}>
-        <View style={styles.innerContainer}>
-          <View style={styles.boneWrapper}>
-            <BoneLabelSvg label="출석" />
-          </View>
-          <View style={styles.boardContainer}>
-            {board.map((item) => (
-              <View
-                key={item.day}
-                style={[styles.dayBox, item.checkedIn && styles.checkedInBox]}
-              >
-                <Text style={styles.dayText}>{item.day}</Text>
-                <View style={styles.centerBox}>
-                  <MoneyIcon
-                    width={SCREEN_WIDTH * 0.04}
-                    height={SCREEN_WIDTH * 0.04}
-                  />
-                  <Text style={styles.rewardText}>{item.reward}</Text>
-                </View>
+  return (
+    <Modal
+      visible={true}
+      transparent={true}
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      {isLoading ? (
+        <LoadingSpinner isVisible={true} />
+      ) : (
+        <View style={styles.overlay}>
+          <View style={styles.container}>
+            <View style={styles.innerContainer}>
+              <View style={styles.boneWrapper}>
+                <BoneLabelSvg label="출석" />
               </View>
-            ))}
+              <View style={styles.boardContainer}>
+                {board.map((item) => (
+                  <View
+                    key={item.day}
+                    style={[styles.dayBox, item.checkedIn && styles.checkedInBox]}
+                  >
+                    <Text style={styles.dayText}>{item.day}</Text>
+                    <View style={styles.centerBox}>
+                      <MoneyIcon
+                        width={SCREEN_WIDTH * 0.04}
+                        height={SCREEN_WIDTH * 0.04}
+                      />
+                      <Text style={styles.rewardText}>{item.reward}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+              <CommonButton label="보상받기" onPress={handleCheckin} />
+            </View>
           </View>
-          <CommonButton label="보상받기" onPress={handleCheckin} />
         </View>
-      </View>
-    </View>
+      )}
+    </Modal>
   );
 }
 
