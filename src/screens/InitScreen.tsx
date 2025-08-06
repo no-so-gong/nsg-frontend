@@ -70,7 +70,8 @@ export default function InitScreen() {
       const res = await registerNames({ userId, animals });
       await setUserId(userId);
       Alert.alert(res.message);
-      
+      setModalVisible(false);
+
       // 다음 화면으로 navigation
       navigation.navigate('MainScreen');
     } catch (error: unknown) {
