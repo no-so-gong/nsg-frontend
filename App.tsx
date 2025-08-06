@@ -44,7 +44,7 @@ export default function App() {
       <LoadingSpinner isVisible={isLoading} />
       <Stack.Navigator initialRouteName="InitScreen" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="InitScreen" component={InitScreen} />
-        <Stack.Screen name="MainScreen" component={MainScreen} />
+        <Stack.Screen name="MainScreen" component={MainScreen} options={{ gestureEnabled: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
