@@ -5,6 +5,7 @@ import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
 import MoneyStatus from '@/components/MoneyStatus';
 import BoneLabelSvg from '@/components/BoneLabelSvg';
 import IconActionButton from '@/components/IconActionButton';
+import AttendanceBoard from '@/components/AttendanceBoard';
 
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
@@ -21,6 +22,10 @@ export default function MainScreen() {
   const [shibaInfo, setShibaInfo] = useState<PetInfo | null>(null);
   const [duckInfo, setDuckInfo] = useState<PetInfo | null>(null);
   const [chickInfo, setChickInfo] = useState<PetInfo | null>(null);
+
+  // 출석 모달 상태
+  const [isAttendanceVisible, setIsAttendanceVisible] = useState(true);
+
   // 추후에 해당 화면의 animalId에 따라 Info를 선택해서 currentPetInfo에 주입
   // const getCurrentPetInfo = (animalId: number): PetInfo | null => {
   //   switch (animalId) {
@@ -72,83 +77,88 @@ export default function MainScreen() {
   }, [userId]); // 현재는 userId가 변경되었을 때만 api 재호출(추후에는 돈이 사용되는 것을 감지해서 호출)
 
   return (
-    <ImageBackground
-      source={require('@assets/images/Main.png')}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      {/* 상단 게이지들 */}
-      <View style={styles.gaugeRow}>
-        {/* 감정 게이지 - 좌측 */}
-        <View style={styles.leftGauge}>
-          <EmotionAffinityGauge
-            value={shibaInfo?.currentEmotion ? Math.floor(shibaInfo.currentEmotion) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
-            icon={require('@assets/icons/heart.png')} // 현재 기분
+    <>
+      {isAttendanceVisible && (
+        <AttendanceBoard onClose={() => setIsAttendanceVisible(false)} />
+      )}
+      <ImageBackground
+        source={require('@assets/images/Main.png')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        {/* 상단 게이지들 */}
+        <View style={styles.gaugeRow}>
+          {/* 감정 게이지 - 좌측 */}
+          <View style={styles.leftGauge}>
+            <EmotionAffinityGauge
+              value={shibaInfo?.currentEmotion ? Math.floor(shibaInfo.currentEmotion) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+              icon={require('@assets/icons/heart.png')} // 현재 기분
+            />
+          </View>
+
+          {/* 편애도 게이지 - 중앙 */}
+          <View style={styles.centerGauge}>
+            <EmotionAffinityGauge
+              value={shibaInfo?.userPatternBias ? Math.floor(shibaInfo.userPatternBias * 100) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+              icon={require('@assets/icons/friend.png')} // 편애도
+            />
+          </View>
+
+          {/* 보유 돈 컴포넌트 자리 - 우측 */}
+          <View style={styles.rightGauge}>
+            <MoneyStatus
+              value={money}
+              icon={require('@assets/icons/money.png')}
+            />
+          </View>
+        </View>
+
+        {/* 유저 버튼 및 게임 버튼 */}
+        <View style={styles.userGameWrapper}>
+          <BoneLabelSvg
+            label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+            widthRatio={0.2}
+            style={styles.userName}
+          />
+          <IconActionButton
+            icon={require('@assets/icons/game.png')} // "게임" 아이콘
+            // onPress={() => setVisibleModal('game')} // 추후에 누르면, 게임 진입 화면 나오기
+            iconSize={60}
+            style={styles.gameIcon}
           />
         </View>
 
-        {/* 편애도 게이지 - 중앙 */}
-        <View style={styles.centerGauge}>
-          <EmotionAffinityGauge
-            value={shibaInfo?.userPatternBias ? Math.floor(shibaInfo.userPatternBias * 100) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
-            icon={require('@assets/icons/friend.png')} // 편애도
+        {/* 중앙에 시바견 이미지 */}
+        <View style={styles.animalWrapper}>
+          <Image
+            source={require('@assets/images/shiba_image4.png')} // 추후에는 컴포넌트로 동물 타입, 현재 기분 넘겨주면 알맞는 이미지가 나오도록 수정 예정
+            style={styles.animalImage}
+            resizeMode="contain"
           />
         </View>
 
-        {/* 보유 돈 컴포넌트 자리 - 우측 */}
-        <View style={styles.rightGauge}>
-          <MoneyStatus
-            value={money}
-            icon={require('@assets/icons/money.png')}
+        {/* 하단 액션 버튼들 */}
+        <View style={styles.actionButtonRow}>
+          <IconActionButton
+            icon={require('@assets/icons/play.png')}
+            iconSize={92}
+          // onPress={() => setVisibleModal('play')} // 추후에 누르면, 놀기 카테고리 화면 나오기
+          />
+          <IconActionButton
+            icon={require('@assets/icons/feed.png')}
+            iconSize={92}
+          // onPress={() => setVisibleModal('feed')} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
+          />
+          <IconActionButton
+            icon={require('@assets/icons/gift.png')}
+            iconSize={92}
+          // onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
           />
         </View>
-      </View>
-
-      {/* 유저 버튼 및 게임 버튼 */}
-      <View style={styles.userGameWrapper}>
-        <BoneLabelSvg
-          label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
-          widthRatio={0.2}
-          style={styles.userName}
-        />
-        <IconActionButton
-          icon={require('@assets/icons/game.png')} // "게임" 아이콘
-          // onPress={() => setVisibleModal('game')} // 추후에 누르면, 게임 진입 화면 나오기
-          iconSize={60}
-          style={styles.gameIcon}
-        />
-      </View>
-
-      {/* 중앙에 시바견 이미지 */}
-      <View style={styles.animalWrapper}>
-        <Image
-          source={require('@assets/images/shiba_image4.png')} // 추후에는 컴포넌트로 동물 타입, 현재 기분 넘겨주면 알맞는 이미지가 나오도록 수정 예정
-          style={styles.animalImage}
-          resizeMode="contain"
-        />
-      </View>
-
-      {/* 하단 액션 버튼들 */}
-      <View style={styles.actionButtonRow}>
-        <IconActionButton
-          icon={require('@assets/icons/play.png')}
-          iconSize={92}
-        // onPress={() => setVisibleModal('play')} // 추후에 누르면, 놀기 카테고리 화면 나오기
-        />
-        <IconActionButton
-          icon={require('@assets/icons/feed.png')}
-          iconSize={92}
-        // onPress={() => setVisibleModal('feed')} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
-        />
-        <IconActionButton
-          icon={require('@assets/icons/gift.png')}
-          iconSize={92}
-        // onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
-        />
-      </View>
 
 
-    </ImageBackground>
+      </ImageBackground>
+    </>
   );
 }
 
