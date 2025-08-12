@@ -5,12 +5,13 @@ import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
 import MoneyStatus from '@/components/MoneyStatus';
 import BoneLabelSvg from '@/components/BoneLabelSvg';
 import IconActionButton from '@/components/IconActionButton';
-
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
 import { getPetInfo, PetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
 
+import Game from "../../assets/icons/game.svg";
+// import Attendance from "../../assets/icons/attendance.svg";
 export default function MainScreen() {
 
   // 사용자 info
@@ -103,7 +104,6 @@ export default function MainScreen() {
           />
         </View>
       </View>
-
       {/* 유저 버튼 및 게임 버튼 */}
       <View style={styles.userGameWrapper}>
         <BoneLabelSvg
@@ -111,11 +111,17 @@ export default function MainScreen() {
           widthRatio={0.2}
           style={styles.userName}
         />
+        {/* <IconActionButton
+          icon={Attendance}
+          iconSize={60}
+          style={styles.Icon}
+        // onPress={() => setVisibleModal('gift')} // 추후에 누르면, 출석 카테고리 화면 나오기
+        /> */}
         <IconActionButton
-          icon={require('@assets/icons/game.png')} // "게임" 아이콘
+          icon={Game}
           // onPress={() => setVisibleModal('game')} // 추후에 누르면, 게임 진입 화면 나오기
           iconSize={60}
-          style={styles.gameIcon}
+          style={styles.Icon}
         />
       </View>
 
@@ -190,7 +196,7 @@ const styles = StyleSheet.create({
   userName: {
     marginLeft: -14
   },
-  gameIcon: {
+  Icon: {
     marginLeft: -14
   },
   actionButtonRow: {
