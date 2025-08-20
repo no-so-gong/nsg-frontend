@@ -9,9 +9,7 @@ import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
 import { getPetInfo, PetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
-
-import Game from "../../assets/icons/game.svg";
-// import Attendance from "../../assets/icons/attendance.svg";
+import SVGButton from '@/components/SVGButton';
 export default function MainScreen() {
 
   // 사용자 info
@@ -111,17 +109,24 @@ export default function MainScreen() {
           widthRatio={0.2}
           style={styles.userName}
         />
-        {/* <IconActionButton
-          icon={Attendance}
-          iconSize={60}
-          style={styles.Icon}
-        // onPress={() => setVisibleModal('gift')} // 추후에 누르면, 출석 카테고리 화면 나오기
-        /> */}
-        <IconActionButton
-          icon={Game}
-          // onPress={() => setVisibleModal('game')} // 추후에 누르면, 게임 진입 화면 나오기
-          iconSize={60}
-          style={styles.Icon}
+        <SVGButton
+          iconName="gamepad-variant"
+          iconSize={30}
+          iconColor="#fff"
+          label="게임"
+          backgroundColor="#CBA74E"
+          style={{ marginLeft: -15 }}
+          // onPress={() => navigation.navigate('')}
+
+        />
+        <SVGButton
+          iconName="calendar-check"
+          iconSize={28}
+          iconColor="#fff"
+          label="출석"
+          backgroundColor="#CBA74E"
+          style={{ marginLeft: -15 }}
+          // onPress={() => navigation.navigate('')}
         />
       </View>
 
