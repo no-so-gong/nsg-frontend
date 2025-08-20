@@ -5,7 +5,7 @@ import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
 import MoneyStatus from '@/components/MoneyStatus';
 import BoneLabelSvg from '@/components/BoneLabelSvg';
 import IconActionButton from '@/components/IconActionButton';
-import AttendanceBoard from '@/components/AttendanceBoard';
+import attendanceBoard from '../components/AttendanceBoard';
 import SVGButton from '@/components/SVGButton';
 
 import { useEffect, useState } from 'react';
