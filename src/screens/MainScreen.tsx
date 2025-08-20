@@ -5,7 +5,8 @@ import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
 import MoneyStatus from '@/components/MoneyStatus';
 import BoneLabelSvg from '@/components/BoneLabelSvg';
 import IconActionButton from '@/components/IconActionButton';
-import AttendanceBoard from '@/components/AttendanceBoard';
+import attendanceBoard from '../components/AttendanceBoard';
+import SVGButton from '@/components/SVGButton';
 
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
@@ -113,20 +114,34 @@ export default function MainScreen() {
           </View>
         </View>
 
-        {/* 유저 버튼 및 게임 버튼 */}
-        <View style={styles.userGameWrapper}>
-          <BoneLabelSvg
-            label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
-            widthRatio={0.2}
-            style={styles.userName}
-          />
-          <IconActionButton
-            icon={require('@assets/icons/game.png')} // "게임" 아이콘
-            // onPress={() => setVisibleModal('game')} // 추후에 누르면, 게임 진입 화면 나오기
-            iconSize={60}
-            style={styles.gameIcon}
-          />
-        </View>
+       {/* 유저 버튼 및 게임 버튼 */}
+      <View style={styles.userGameWrapper}>
+        <BoneLabelSvg
+          label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+          widthRatio={0.2}
+          style={styles.userName}
+        />
+        <SVGButton
+          iconName="gamepad-variant"
+          iconSize={30}
+          iconColor="#fff"
+          label="게임"
+          backgroundColor="#CBA74E"
+          style={{ marginLeft: -15 }}
+          // onPress={() => navigation.navigate('')}
+
+        />
+        <SVGButton
+          iconName="calendar-check"
+          iconSize={28}
+          iconColor="#fff"
+          label="출석"
+          backgroundColor="#CBA74E"
+          style={{ marginLeft: -15 }}
+          // onPress={() => navigation.navigate('')}
+        />
+      </View>
+
 
         {/* 중앙에 시바견 이미지 */}
         <View style={styles.animalWrapper}>
