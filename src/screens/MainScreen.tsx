@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ImageBackground, StyleSheet, Image } from 'react-native';
+import { View, ImageBackground, StyleSheet, Image, FlatList } from 'react-native';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
 import MoneyStatus from '@/components/MoneyStatus';
@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
 import { getPetInfo, PetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
-
+import { getAnimalImageByEmotion } from '@/components/animalImages';
 export default function MainScreen() {
 
   // 사용자 info
@@ -23,7 +23,12 @@ export default function MainScreen() {
   const [shibaInfo, setShibaInfo] = useState<PetInfo | null>(null);
   const [duckInfo, setDuckInfo] = useState<PetInfo | null>(null);
   const [chickInfo, setChickInfo] = useState<PetInfo | null>(null);
-
+  // 동물 Carousel 배열
+  const pets = [
+    { id: 1, info: shibaInfo, image: require('@assets/images/shiba_image4.png') },
+    { id: 2, info: duckInfo, image: require('@assets/images/duck_image4.png') },
+    { id: 3, info: chickInfo, image: require('@assets/images/chick_image4.png') },
+  ];
   // 출석 모달 상태
   const [isAttendanceVisible, setIsAttendanceVisible] = useState(true);
 
@@ -142,15 +147,25 @@ export default function MainScreen() {
         />
       </View>
 
+        {/* 중앙 동물 */}
+        <FlatList
+          data={pets}
+          keyExtractor={(item) => item.id.toString()}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ alignItems: 'center' }}
+          renderItem={({ item }) => {
+            const emotion = item.info?.currentEmotion ?? 0; 
+            const animalImage = getAnimalImageByEmotion(item.id, Math.floor(emotion));
 
-        {/* 중앙에 시바견 이미지 */}
-        <View style={styles.animalWrapper}>
-          <Image
-            source={require('@assets/images/shiba_image4.png')} // 추후에는 컴포넌트로 동물 타입, 현재 기분 넘겨주면 알맞는 이미지가 나오도록 수정 예정
-            style={styles.animalImage}
-            resizeMode="contain"
-          />
-        </View>
+            return (
+              <View style={{ width: SCREEN_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
+                <Image source={animalImage} style={styles.animalImage} resizeMode="contain" />
+              </View>
+            );
+          }}
+        />
 
         {/* 하단 액션 버튼들 */}
         <View style={styles.actionButtonRow}>
