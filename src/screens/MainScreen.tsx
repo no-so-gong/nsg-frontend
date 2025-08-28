@@ -31,17 +31,11 @@ export default function MainScreen() {
   ];
   // 출석 모달 상태
   const [isAttendanceVisible, setIsAttendanceVisible] = useState(true);
+  // 현재 선택된 펫 인덱스
+  const [currentPetIndex, setCurrentPetIndex] = useState(0);
 
-  // 추후에 해당 화면의 animalId에 따라 Info를 선택해서 currentPetInfo에 주입
-  // const getCurrentPetInfo = (animalId: number): PetInfo | null => {
-  //   switch (animalId) {
-  //     case 1: return shibaInfo;
-  //     case 2: return duckInfo;
-  //     case 3: return chickInfo;
-  //     default: return null;
-  //   }
-  // };
-  // const currentPetInfo = getCurrentPetInfo(currentAnimalId);
+  // 현재 화면에 표시된 동물의 정보 가져오기
+  const currentPetInfo = pets[currentPetIndex]?.info || null;
 
   // 동물의 info에 정보 불러오기
   useEffect(() => {
@@ -97,7 +91,7 @@ export default function MainScreen() {
           {/* 감정 게이지 - 좌측 */}
           <View style={styles.leftGauge}>
             <EmotionAffinityGauge
-              value={shibaInfo?.currentEmotion ? Math.floor(shibaInfo.currentEmotion) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+              value={currentPetInfo?.currentEmotion ? Math.floor(currentPetInfo.currentEmotion) : 0}
               icon={require('@assets/icons/heart.png')} // 현재 기분
             />
           </View>
@@ -105,7 +99,7 @@ export default function MainScreen() {
           {/* 편애도 게이지 - 중앙 */}
           <View style={styles.centerGauge}>
             <EmotionAffinityGauge
-              value={shibaInfo?.userPatternBias ? Math.floor(shibaInfo.userPatternBias * 100) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+              value={currentPetInfo?.userPatternBias ? Math.floor(currentPetInfo.userPatternBias * 100) : 0}
               icon={require('@assets/icons/friend.png')} // 편애도
             />
           </View>
@@ -122,7 +116,7 @@ export default function MainScreen() {
        {/* 유저 버튼 및 게임 버튼 */}
       <View style={styles.userGameWrapper}>
         <BoneLabelSvg
-          label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+          label={currentPetInfo?.name ? currentPetInfo.name : "미정"}
           widthRatio={0.2}
           style={styles.userName}
         />
@@ -155,6 +149,12 @@ export default function MainScreen() {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ alignItems: 'center' }}
+          onScroll={(event) => {
+            const contentOffsetX = event.nativeEvent.contentOffset.x;
+            const index = Math.round(contentOffsetX / SCREEN_WIDTH);
+            setCurrentPetIndex(index);
+          }}
+          scrollEventThrottle={16}
           renderItem={({ item }) => {
             const emotion = item.info?.currentEmotion ?? 0; 
             const animalImage = getAnimalImageByEmotion(item.id, Math.floor(emotion));
