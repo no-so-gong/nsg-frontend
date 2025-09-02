@@ -45,3 +45,38 @@ export const getUserProperty = async (userId: string): Promise<UserPropertyRespo
     }
   }
 };
+
+// 미완 
+export const addUserMoney = async (userId: string, amount: number): Promise<UserPropertyResponse> => {
+  try {
+    const url = `${API_URL}${USER_BASE}/property/money`; // 디비에 이 사용자에게 이 정도의 골드를 제공해줘!!라고 요청하는 api
+    console.log('골드 지급 요청:', { url, userId, amount });
+    
+    const response = await axios.patch<UserPropertyResponse>(
+      url,
+      { amount },
+      {
+        headers: {
+          'user-id': userId,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('골드 지급 API 에러:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        headers: error.config?.headers
+      });
+      throw error;
+    } else if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('골드 지급 실패: 알 수 없는 에러');
+    }
+  }
+};
