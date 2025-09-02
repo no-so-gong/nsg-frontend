@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -428,6 +428,15 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
             {/* 다음 블록 미리보기 */}
             <View style={styles.sidePanel}>
               {nextPieces.length > 0 && renderNextPiece(nextPieces[0], 0)}
+              
+              {/* 병아리 이미지 */}
+              <View style={styles.chickImageContainer}>
+                <Image
+                  source={require('@assets/images/chick_image3.png')}
+                  style={styles.chickImage}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
           </View>
 
@@ -571,6 +580,14 @@ const styles = StyleSheet.create({
   nextPieceContainer: {
     alignItems: 'center',
     marginBottom: 10,
+  },
+  chickImageContainer: {
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  chickImage: {
+    width: 60,
+    height: 60,
   },
   nextLabel: {
     color: 'white',
