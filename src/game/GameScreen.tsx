@@ -52,7 +52,6 @@ export default function GameScreen({ navigation }: any) {
       <MinigameWrapper
         userId={userId || ''}
         gameName="tetris"
-        maxPlaysPerDay={5}
         goldPerPoint={1}
         visible={selectedGame === 'tetris'}
         onClose={closeGame}
@@ -64,7 +63,6 @@ export default function GameScreen({ navigation }: any) {
       <MinigameWrapper
         userId={userId || ''}
         gameName="poop_dodge"
-        maxPlaysPerDay={5}
         goldPerPoint={2}
         visible={selectedGame === 'poop'}
         onClose={closeGame}

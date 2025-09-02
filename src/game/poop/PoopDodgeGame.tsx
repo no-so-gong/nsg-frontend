@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
-
+import usePetStore from '@zustand/usePetStore';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type GameObject = { id: string; x: number; y: number; sx: number; sy: number; move: number; image: any; };
-const createPlayer = (): GameObject => ({ 
+const createPlayer = (image?: any): GameObject => ({
   id: 'player', 
   x: SCREEN_WIDTH / 2 - 25, 
   y: SCREEN_HEIGHT - 120, 
   sx: 50, 
   sy: 80, 
   move: 10, 
-  image: require('./assets/shiba_image6.png') 
+  image: image ?? require('@assets/images/shiba_image6.png'), // 기본값
 });
 
 const createAlien = (difficulty: number): GameObject => ({ 
@@ -22,11 +22,12 @@ const createAlien = (difficulty: number): GameObject => ({
   sx: 40, 
   sy: 40, 
   move: 3 + difficulty * 0.5, 
-  image: require('./assets/poop.png') 
+  image: require('@assets/icons/poop.png')
 });
 
 export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
-  const [player, setPlayer] = useState<GameObject>(createPlayer());
+  const playerImage = usePetStore(state => state.currentPetImage);
+  const [player, setPlayer] = useState<GameObject | null>(null);
   const playerRef = useRef<GameObject>(player);
   const [aliens, setAliens] = useState<GameObject[]>([]);
   const [dodgedCount, setDodgedCount] = useState(0);
@@ -35,52 +36,69 @@ export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProp
   const [isGameOver, setIsGameOver] = useState(false);
   const [showStartScreen, setShowStartScreen] = useState(true);
   const PLAYER_SCALE = 1.5;
-
+  
   const moveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const startGame = () => {
-    const p = createPlayer();
+    if (!playerImage) return;
+    const p = createPlayer(playerImage);
     setPlayer(p);
     playerRef.current = p;
-    setAliens([]);
-    setDodgedCount(0);
-    setTime(0);
-    setIsGameOver(false);
-    setRunning(true);
-    setShowStartScreen(false);
+      setAliens([]);
+      setDodgedCount(0);
+      setTime(0);
+      setIsGameOver(false);
+      setRunning(true);
+      setShowStartScreen(false);
   };
 
   // 점수 업데이트
   useEffect(() => {
     onScoreUpdate(dodgedCount);
   }, [dodgedCount, onScoreUpdate]);
-
-  // 게임 루프
+  // 현재 화면 동물 뽑기
   useEffect(() => {
-    if (!running) return;
-    const gameLoop = setInterval(() => {
-      const difficulty = Math.floor(time / 10);
-      const spawnRate = 0.98 - difficulty * 0.005;
+    if (!playerImage) return;
+    const p = createPlayer(playerImage);
+    setPlayer(p);
+    playerRef.current = p;
+  }, [playerImage]);
+  // 게임 루프
+useEffect(() => {
+  if (!running) return;
+  const gameLoop = setInterval(() => {
+    const difficulty = Math.floor(time / 10);
+    const spawnRate = 0.98 - difficulty * 0.005;
+    setAliens(prevAliens => {
+      let currentAliens = prevAliens.map(a => ({ ...a, y: a.y + a.move }));
+      const survivedAliens = currentAliens.filter(a => a.y < SCREEN_HEIGHT);
+      const dodgedThisFrame = currentAliens.length - survivedAliens.length;
+      if (dodgedThisFrame > 0) setDodgedCount(prev => prev + dodgedThisFrame);
 
-      setAliens(prevAliens => {
-        let currentAliens = prevAliens.map(a => ({ ...a, y: a.y + a.move }));
-        const survivedAliens = currentAliens.filter(a => a.y < SCREEN_HEIGHT);
-        const dodgedThisFrame = currentAliens.length - survivedAliens.length;
-        if (dodgedThisFrame > 0) {
-          setDodgedCount(prev => prev + dodgedThisFrame);
-        }
+      for (const alien of survivedAliens) {
+        const p = playerRef.current;
+        if (!p) continue; // p가 null이면 건너뜀
 
-        for (const alien of survivedAliens) {
-          const p = playerRef.current;
-          if (p.x < alien.x + alien.sx && p.x + p.sx > alien.x && p.y < alien.y + alien.sy && p.y + p.sy > alien.y) {
-            setRunning(false);
-            setIsGameOver(true);
-            setTimeout(() => onGameEnd(dodgedCount), 0);
-            return [];
-          }
+        const playerWidth = p.sx * PLAYER_SCALE;
+        const playerHeight = p.sy * PLAYER_SCALE;
+
+        // 충돌 감지
+        const padding = 10;
+        if (
+          p.x + padding < alien.x + alien.sx - padding &&
+          p.x + playerWidth - padding > alien.x + padding &&
+          p.y + padding < alien.y + alien.sy - padding &&
+          p.y + playerHeight - padding > alien.y + padding
+        ) {
+          setRunning(false);
+          setIsGameOver(true);
+          setTimeout(() => onGameEnd(dodgedCount), 0);
+          return [];
         }
-        return survivedAliens;
-      });
+      }
+
+      return survivedAliens;
+    });
 
       if (Math.random() > spawnRate) setAliens(prev => [...prev, createAlien(difficulty)]);
     }, 1000 / 60);
@@ -95,8 +113,10 @@ export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProp
 
   const handleMove = (direction: 'left' | 'right') => {
     setPlayer(p => {
+      if (!p) return p; // p가 null이면 아무것도 안함
       const newX = direction === 'left' ? p.x - p.move : p.x + p.move;
-      const clampedX = Math.min(Math.max(0, newX), SCREEN_WIDTH - p.sx);
+      const maxX = SCREEN_WIDTH - p.sx * PLAYER_SCALE;  
+      const clampedX = Math.min(Math.max(0, newX), maxX);
       const updated = { ...p, x: clampedX };
       playerRef.current = updated;
       return updated;
@@ -141,14 +161,19 @@ export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProp
         </View>
       ) : (
         <>
+        <View style={styles.hudcontainer}>
           <Text style={styles.hudLeft}>피한 똥: {dodgedCount}</Text>
           <Text style={styles.hudRight}>시간: {time}</Text>
+        </View>
 
-          <Image
-            source={player.image}
-            style={[styles.player, { left: player.x, top: player.y, width: player.sx * PLAYER_SCALE, height: undefined, aspectRatio: player.sx / player.sy }]}
-            resizeMode="contain"
-          />
+
+{player && (
+  <Image
+    source={player.image}
+    style={[styles.player, { left: player.x, top: player.y, width: player.sx * PLAYER_SCALE, height: undefined, aspectRatio: player.sx / player.sy }]}
+    resizeMode="contain"
+  />
+)}
           {aliens.map(a => <Image key={a.id} source={a.image} style={{ position: 'absolute', left: a.x, top: a.y, width: a.sx, height: a.sy }} />)}
           
           {/* 좌우 버튼 */}
@@ -212,20 +237,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold' 
   },
-  hudLeft: { 
-    position: 'absolute', 
-    top: 80, 
-    left: 10, 
-    color: 'yellow', 
-    fontSize: 16,
-    fontWeight: 'bold' 
+
+  hudcontainer: {
+    flexDirection: 'row',   
+    alignItems: 'center',  
+    top: 50, 
   },
-  hudRight: { 
-    position: 'absolute', 
-    top: 80, 
-    right: 10, 
-    color: 'yellow',
-    fontSize: 16, 
+  hudLeft: {
+    marginRight: 16,
+     color: 'yellow', 
+    fontSize: 16,
+    fontWeight: 'bold'        
+  },
+  hudRight: {
+     color: 'yellow', 
+    fontSize: 16,
     fontWeight: 'bold' 
   },
   player: { 
@@ -251,10 +277,10 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     backgroundColor: '#1f2937',
-    padding: 15,
+    padding: 20,
     borderRadius: 10,
     position: 'absolute',
-    bottom: 80,
+    bottom: 20,
   },
   leftButton: { 
     left: 30 
