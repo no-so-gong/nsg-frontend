@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useFonts } from 'expo-font';
 import InitScreen from '@/screens/InitScreen';
 import MainScreen from '@/screens/MainScreen';
+import GameScreen from '@/game/GameScreen';
 import useSplashStore from '@zustand/useSplashStore';
 import useLoadingStore from '@zustand/useLoadingStore';
 import useUserStore from '@zustand/useUserStore';
@@ -45,6 +46,7 @@ export default function App() {
       <Stack.Navigator initialRouteName="InitScreen" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="InitScreen" component={InitScreen} />
         <Stack.Screen name="MainScreen" component={MainScreen} options={{ gestureEnabled: false }} />
+        <Stack.Screen name="GameScreen" component={GameScreen} options={{ gestureEnabled: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

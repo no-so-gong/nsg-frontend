@@ -1,0 +1,136 @@
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Modal, Image } from 'react-native';
+import BoneLabelSvg from './BoneLabelSvg';
+import CommonButton from './CommonButton';
+import MoneyStatus from './MoneyStatus';
+import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
+import Feed1 from "@assets/icons/feed1.png";
+import Feed2 from "@assets/icons/feed2.png";
+import Feed3 from "@assets/icons/feed3.png";
+
+interface CategoryBoardProps {
+  onClose: () => void;
+}
+
+// 카테고리별 아이템과 이미지, 가격 정보를 객체로 관리
+const CATEGORY_ITEMS = {
+  feed: [
+    { id: 1, image: Feed1, price: 30 },
+    { id: 2, image: Feed2, price: 20 },
+    { id: 3, image: Feed3, price: 30 },
+  ],
+  play: [
+    { id: 1, image: Feed1, price: 15 },
+    { id: 2, image: Feed2, price: 25 },
+    { id: 3, image: Feed3, price: 35 },
+  ],
+  gift: [
+    { id: 1, image: Feed1, price: 50 },
+    { id: 2, image: Feed2, price: 60 },
+    { id: 3, image: Feed3, price: 70 },
+  ],
+};
+
+export default function CategoryBoard({ onClose }: CategoryBoardProps) {
+  const [selectedCategory, setSelectedCategory] = useState<'feed' | 'play' | 'gift'>('feed');
+  const [categoryItems, setCategoryItems] = useState(CATEGORY_ITEMS[selectedCategory]);
+
+  useEffect(() => {
+    setCategoryItems(CATEGORY_ITEMS[selectedCategory]);
+  }, [selectedCategory]);
+
+  const handlePurchase = () => {
+    //상품 구입 API
+    onClose(); 
+  };
+
+  return (
+    <Modal
+      visible={true}
+      transparent={true}
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.innerContainer}>
+            <View style={styles.boneWrapper}>
+              <BoneLabelSvg label="상점" />
+            </View>
+            <View style={styles.boardContainer}>
+              {categoryItems.map(item => (
+                <View key={item.id} style={styles.itemWrapper}>
+                  <Image source={item.image} style={styles.itemImage} />
+                  <MoneyStatus
+                    value={item.price}
+                    icon={require('@assets/icons/money.png')}
+                    containerStyle={{ }}
+                  />
+                </View>
+              ))}
+            </View>
+            <View style={styles.buttonRow}>
+              <CommonButton label="구입" onPress={handlePurchase} />
+              <CommonButton label="취소" onPress={onClose} />
+            </View>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    backgroundColor: '#CBA74E',
+    borderRadius: SCREEN_WIDTH * 0.08,
+    padding: SCREEN_WIDTH * 0.03,
+    width: SCREEN_WIDTH * 0.88,
+    marginHorizontal: SCREEN_HEIGHT * 0.1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  innerContainer: {
+    backgroundColor: '#FFDD82',
+    borderRadius: SCREEN_WIDTH * 0.05,
+    padding: SCREEN_WIDTH * 0.04,
+    width: '100%',
+    alignItems: 'center',
+  },
+  boneWrapper: {
+    position: 'absolute',
+    top: -SCREEN_HEIGHT * 0.038,
+    left: SCREEN_WIDTH * 0.29,
+    zIndex: 10,
+  },
+  boardContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SCREEN_HEIGHT * 0.015,
+    marginBottom: SCREEN_HEIGHT * 0.002,
+    width: '100%',
+  },
+  itemWrapper: {
+    alignItems: 'center',
+  },
+  itemImage: {
+    width: 80,
+    height: 80,
+    resizeMode: 'contain',
+    marginBottom: 8,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+});

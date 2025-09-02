@@ -6,14 +6,22 @@ import MoneyStatus from '@/components/MoneyStatus';
 import BoneLabelSvg from '@/components/BoneLabelSvg';
 import IconActionButton from '@/components/IconActionButton';
 import AttendanceBoard from '@/components/AttendanceBoard';
+import CategoryBoard from '@/components/CategoryBoard';
 import SVGButton from '@/components/SVGButton';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../types/navigationTypes';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
 import { getPetInfo, PetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
 import { getAnimalImageByEmotion } from '@/components/animalImages';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'>;
+
 export default function MainScreen() {
+  const navigation = useNavigation<NavigationProp>();
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
@@ -31,6 +39,8 @@ export default function MainScreen() {
   ];
   // 출석 모달 상태
   const [isAttendanceVisible, setIsAttendanceVisible] = useState(true);
+  // 상점 모달 상태
+  const [isCategoryVisible, setIsCategoryVisible] = useState(true);
 
   // 추후에 해당 화면의 animalId에 따라 Info를 선택해서 currentPetInfo에 주입
   // const getCurrentPetInfo = (animalId: number): PetInfo | null => {
@@ -84,9 +94,10 @@ export default function MainScreen() {
 
   return (
     <>
-      {isAttendanceVisible && (
+      {/* {isAttendanceVisible && (
         <AttendanceBoard onClose={() => setIsAttendanceVisible(false)} />
-      )}
+      )} */}
+      {/* <CategoryBoard onClose={() => setIsCategoryVisible}/> */}
       <ImageBackground
         source={require('@assets/images/Main.png')}
         style={styles.background}
@@ -120,21 +131,18 @@ export default function MainScreen() {
         </View>
 
        {/* 유저 버튼 및 게임 버튼 */}
-      <View style={styles.userGameWrapper}>
-        <BoneLabelSvg
-          label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
-          widthRatio={0.2}
-          style={styles.userName}
-        />
+       <View style={[styles.userGameWrapper, { zIndex: 10 }]}>
         <SVGButton
           iconName="gamepad-variant"
           iconSize={30}
           iconColor="#fff"
           label="게임"
           backgroundColor="#CBA74E"
-          style={{ marginLeft: -15 }}
-          // onPress={() => navigation.navigate('')}
-
+          style={{ width: 100, height: 50, marginLeft: -15 }} 
+          onPress={() => {
+            console.log("게임 버튼 클릭됨");
+            navigation.navigate('GameScreen');
+          }}
         />
         <SVGButton
           iconName="calendar-check"
@@ -147,25 +155,29 @@ export default function MainScreen() {
         />
       </View>
 
-        {/* 중앙 동물 */}
-        <FlatList
-          data={pets}
-          keyExtractor={(item) => item.id.toString()}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ alignItems: 'center' }}
-          renderItem={({ item }) => {
-            const emotion = item.info?.currentEmotion ?? 0; 
-            const animalImage = getAnimalImageByEmotion(item.id, Math.floor(emotion));
-
-            return (
-              <View style={{ width: SCREEN_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
-                <Image source={animalImage} style={styles.animalImage} resizeMode="contain" />
-              </View>
-            );
-          }}
-        />
+      {/* 중앙 동물 */}
+      <FlatList
+        data={pets}
+        keyExtractor={(item) => item.id.toString()}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ alignItems: 'center' }}
+        renderItem={({ item }) => {
+          const emotion = item.info?.currentEmotion ?? 0; 
+          const animalImage = getAnimalImageByEmotion(item.id, Math.floor(emotion));
+          return (
+            <View style={{ width: SCREEN_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
+              <Image source={animalImage} style={styles.animalImage} resizeMode="contain" />
+              <BoneLabelSvg
+                label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+                widthRatio={0.2}
+                style={styles.userName}
+              />
+            </View>
+          );
+        }}
+      />
 
         {/* 하단 액션 버튼들 */}
         <View style={styles.actionButtonRow}>
@@ -185,8 +197,6 @@ export default function MainScreen() {
           // onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
           />
         </View>
-
-
       </ImageBackground>
     </>
   );
@@ -225,7 +235,7 @@ const styles = StyleSheet.create({
     top: 110,
     left: 24,
     alignItems: 'center',
-    gap: 10,
+    gap: 20,
   },
   userName: {
     marginLeft: -14
