@@ -6,7 +6,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // 테트리스 설정
 const BOARD_WIDTH = 10;
-const BOARD_HEIGHT = 20;
+const BOARD_HEIGHT = 19;
 const CELL_SIZE = (SCREEN_WIDTH * 0.8) / BOARD_WIDTH;
 
 // 테트리스 블록 모양
@@ -67,6 +67,7 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
     Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(null))
   );
   const [currentPiece, setCurrentPiece] = useState<Piece | null>(null);
+  const [nextPieces, setNextPieces] = useState<Piece[]>([]);
   const [score, setScore] = useState(0);
   const [lines, setLines] = useState(0);
   const [level, setLevel] = useState(1);
@@ -89,6 +90,27 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
       y: 0
     };
   }, []);
+
+  // 다음 블록들 초기화
+  const initializeNextPieces = useCallback(() => {
+    const pieces = [];
+    for (let i = 0; i < 2; i++) {
+      pieces.push(createPiece());
+    }
+    return pieces;
+  }, [createPiece]);
+
+  // 다음 블록 가져오기
+  const getNextPiece = useCallback(() => {
+    if (nextPieces.length === 0) return createPiece();
+    
+    const nextPiece = nextPieces[0];
+    const remainingPieces = nextPieces.slice(1);
+    remainingPieces.push(createPiece());
+    setNextPieces(remainingPieces);
+    
+    return nextPiece;
+  }, [nextPieces, createPiece]);
 
   // 블록 회전
   const rotatePiece = (piece: Piece): Piece => {
@@ -152,7 +174,9 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
   // 게임 시작
   const startGame = () => {
     const newBoard = Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(null));
+    const initialNextPieces = initializeNextPieces();
     setBoard(newBoard);
+    setNextPieces(initialNextPieces);
     setCurrentPiece(createPiece());
     setScore(0);
     setLines(0);
@@ -189,17 +213,17 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
       }
 
       // 새 블록 생성
-      const newPiece = createPiece();
+      const newPiece = getNextPiece();
       if (isValidPosition(newPiece, clearedBoard)) {
         setCurrentPiece(newPiece);
       } else {
         // 게임 오버
         setGameOver(true);
         setIsPlaying(false);
-        onGameEnd(score);
+        onGameEnd(Math.floor(score / 2));
       }
     }
-  }, [currentPiece, board, gameOver, score, level, lines, createPiece, onGameEnd]);
+  }, [currentPiece, board, gameOver, score, level, lines, getNextPiece, onGameEnd]);
 
   // 게임 루프
   useEffect(() => {
@@ -263,7 +287,7 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
     }
 
     // 새 블록 생성
-    const newPiece = createPiece();
+    const newPiece = getNextPiece();
     if (isValidPosition(newPiece, clearedBoard)) {
       setCurrentPiece(newPiece);
     } else {
@@ -326,6 +350,42 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
     return renderBoard;
   };
 
+  // 다음 블록 미리보기 렌더링
+  const renderNextPiece = (piece: Piece, index: number) => {
+    const maxSize = Math.max(piece.shape.length, piece.shape[0]?.length || 0);
+    const cellSize = CELL_SIZE / 3;
+    
+    return (
+      <View key={index} style={styles.nextPieceContainer}>
+        <Text style={styles.nextLabel}>{index === 0 ? 'NEXT' : 'AFTER'}</Text>
+        <View style={[styles.nextPieceBoard, { width: maxSize * cellSize, height: maxSize * cellSize }]}>
+          {Array.from({ length: maxSize }, (_, y) => (
+            <View key={y} style={styles.nextRow}>
+              {Array.from({ length: maxSize }, (_, x) => {
+                const hasBlock = y < piece.shape.length && 
+                                 x < piece.shape[y].length && 
+                                 piece.shape[y][x];
+                return (
+                  <View
+                    key={x}
+                    style={[
+                      styles.nextCell,
+                      {
+                        width: cellSize,
+                        height: cellSize,
+                        backgroundColor: hasBlock ? COLORS[piece.type] : 'transparent'
+                      }
+                    ]}
+                  />
+                );
+              })}
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {!isPlaying ? (
@@ -337,15 +397,18 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
         </View>
       ) : (
         <>
-          {/* 게임 정보 */}
-          <View style={styles.gameInfo}>
-            <Text style={styles.infoText}>Score: {score}</Text>
-            <Text style={styles.infoText}>Lines: {lines}</Text>
-            <Text style={styles.infoText}>Level: {level}</Text>
-          </View>
+          <View style={styles.gameContainer}>
+            {/* 메인 게임 영역 */}
+            <View style={styles.mainGame}>
+              {/* 게임 정보 */}
+              <View style={styles.gameInfo}>
+                <Text style={styles.infoText}>Score: {score}</Text>
+                <Text style={styles.infoText}>Lines: {lines}</Text>
+                <Text style={styles.infoText}>Level: {level}</Text>
+              </View>
 
-          {/* 게임 보드 */}
-          <View style={styles.gameBoard}>
+              {/* 게임 보드 */}
+              <View style={styles.gameBoard}>
             {getRenderBoard().map((row, y) => (
               <View key={y} style={styles.row}>
                 {row.map((cell, x) => (
@@ -359,6 +422,13 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
                 ))}
               </View>
             ))}
+              </View>
+            </View>
+
+            {/* 다음 블록 미리보기 */}
+            <View style={styles.sidePanel}>
+              {nextPieces.length > 0 && renderNextPiece(nextPieces[0], 0)}
+            </View>
           </View>
 
           {/* 조작 버튼 */}
@@ -389,6 +459,10 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
                 <Text style={styles.controlText}>→</Text>
               </TouchableOpacity>
             </View>
+            {/* 하드 드롭 버튼 */}
+            <TouchableOpacity style={styles.hardDropButton} onPress={hardDrop}>
+              <Text style={styles.hardDropText}>⬇</Text>
+            </TouchableOpacity>
           </View>
         </>
       )}
@@ -401,7 +475,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black',
     alignItems: 'center',
-    paddingTop: 80,
+    paddingTop: 40,
   },
   startScreen: {
     flex: 1,
@@ -430,7 +504,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   infoText: {
     color: 'white',
@@ -440,7 +514,8 @@ const styles = StyleSheet.create({
   gameBoard: {
     borderWidth: 2,
     borderColor: 'white',
-    marginBottom: 30,
+    marginBottom: 20,
+    marginTop: 20,
   },
   row: {
     flexDirection: 'row',
@@ -453,11 +528,13 @@ const styles = StyleSheet.create({
   },
   controls: {
     alignItems: 'center',
+    paddingVertical: 20,
   },
   mainControls: {
     flexDirection: 'row',
-    gap: 20,
+    gap: 15,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   controlButton: {
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -468,6 +545,59 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   controlText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  gameContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    flex: 1,
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  sidePanel: {
+    width: 80,
+    alignItems: 'center',
+    position: 'absolute',
+    top: 60,
+    right: 5,
+  },
+  mainGame: {
+    alignItems: 'center',
+  },
+  nextPieceContainer: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  nextLabel: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 3,
+  },
+  nextPieceBoard: {
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  nextRow: {
+    flexDirection: 'row',
+  },
+  nextCell: {
+    borderWidth: 0.5,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  hardDropButton: {
+    backgroundColor: '#ef4444',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hardDropText: {
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
