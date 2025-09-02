@@ -31,14 +31,17 @@ export default function MainScreen() {
   const [shibaInfo, setShibaInfo] = useState<PetInfo | null>(null);
   const [duckInfo, setDuckInfo] = useState<PetInfo | null>(null);
   const [chickInfo, setChickInfo] = useState<PetInfo | null>(null);
+
   // 동물 Carousel 배열
   const pets = [
     { id: 1, info: shibaInfo, image: require('@assets/images/shiba_image4.png') },
     { id: 2, info: duckInfo, image: require('@assets/images/duck_image4.png') },
     { id: 3, info: chickInfo, image: require('@assets/images/chick_image4.png') },
   ];
+  
   // 출석 모달 상태
   const [isAttendanceVisible, setIsAttendanceVisible] = useState(true);
+  
   // 상점 모달 상태
   const [isCategoryVisible, setIsCategoryVisible] = useState(true);
 
@@ -232,7 +235,7 @@ const styles = StyleSheet.create({
   },
   userGameWrapper: {
     position: 'absolute',
-    top: 110,
+    top: 140,
     left: 24,
     alignItems: 'center',
     gap: 20,

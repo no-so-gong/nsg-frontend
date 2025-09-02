@@ -504,7 +504,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: -10,
+    marginTop: 20,
   },
   infoText: {
     color: 'white',
@@ -561,8 +562,8 @@ const styles = StyleSheet.create({
     width: 80,
     alignItems: 'center',
     position: 'absolute',
-    top: 60,
-    right: 5,
+    top: 52,
+    right: -15,
   },
   mainGame: {
     alignItems: 'center',
