@@ -11,17 +11,20 @@ import SVGButton from '@/components/SVGButton';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigationTypes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
+import GameScreen from '@/game/GameScreen';
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
 import { getPetInfo, PetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
 import { getAnimalImageByEmotion } from '@/components/animalImages';
-
+import usePetStore from '@zustand/usePetStore';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'>;
 
 export default function MainScreen() {
   const navigation = useNavigation<NavigationProp>();
+  // 현재 화면에 있는 동물 뽑기
+  const setCurrentPetImage = usePetStore(state => state.setCurrentPetImage);
+  const [currentPetIndex, setCurrentPetIndex] = useState(0);
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
@@ -141,6 +144,7 @@ export default function MainScreen() {
           style={{ width: 100, height: 50, marginLeft: -15 }} 
           onPress={() => {
             console.log("게임 버튼 클릭됨");
+            setCurrentPetImage(pets[currentPetIndex].image);
             navigation.navigate('GameScreen');
           }}
         />
@@ -155,29 +159,24 @@ export default function MainScreen() {
         />
       </View>
 
-      {/* 중앙 동물 */}
-      <FlatList
-        data={pets}
-        keyExtractor={(item) => item.id.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ alignItems: 'center' }}
-        renderItem={({ item }) => {
-          const emotion = item.info?.currentEmotion ?? 0; 
-          const animalImage = getAnimalImageByEmotion(item.id, Math.floor(emotion));
-          return (
+        {/* 중앙 동물 */}
+        <FlatList
+          data={pets}
+          keyExtractor={(item) => item.id.toString()}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(event) => {
+            const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+            setCurrentPetIndex(index);
+          }}
+          renderItem={({ item }) => (
             <View style={{ width: SCREEN_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
-              <Image source={animalImage} style={styles.animalImage} resizeMode="contain" />
-              <BoneLabelSvg
-                label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
-                widthRatio={0.2}
-                style={styles.userName}
-              />
+              <Image source={item.image} style={styles.animalImage} resizeMode="contain" />
+              <BoneLabelSvg label={item.info?.name ?? "미정"} widthRatio={0.2} style={styles.userName} />
             </View>
-          );
-        }}
-      />
+          )}
+        />
 
         {/* 하단 액션 버튼들 */}
         <View style={styles.actionButtonRow}>
