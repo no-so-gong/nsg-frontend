@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
+import usePetStore from '@zustand/usePetStore';
+import { getAnimalImageByEmotion } from '@/components/animalImages';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -16,15 +18,47 @@ interface Position {
   id: string; // 고유 ID
 }
 
-// 오리 이미지 배열
-const DUCK_IMAGES = [
-  require('@assets/images/duck_image1.png'),
-  require('@assets/images/duck_image2.png'),
-  require('@assets/images/duck_image3.png'),
-  require('@assets/images/duck_image4.png'),
-  require('@assets/images/duck_image5.png'),
-  require('@assets/images/duck_image6.png'),
-];
+// 동물별 6개 이미지 배열
+const getAnimalImages = (animalId: number) => {
+  switch (animalId) {
+    case 1: // 시바견
+      return [
+        require('@assets/images/shiba_image1.png'),
+        require('@assets/images/shiba_image2.png'),
+        require('@assets/images/shiba_image3.png'),
+        require('@assets/images/shiba_image4.png'),
+        require('@assets/images/shiba_image5.png'),
+        require('@assets/images/shiba_image6.png'),
+      ];
+    case 2: // 오리
+      return [
+        require('@assets/images/duck_image1.png'),
+        require('@assets/images/duck_image2.png'),
+        require('@assets/images/duck_image3.png'),
+        require('@assets/images/duck_image4.png'),
+        require('@assets/images/duck_image5.png'),
+        require('@assets/images/duck_image6.png'),
+      ];
+    case 3: // 병아리
+      return [
+        require('@assets/images/chick_image1.png'),
+        require('@assets/images/chick_image2.png'),
+        require('@assets/images/chick_image3.png'),
+        require('@assets/images/chick_image4.png'),
+        require('@assets/images/chick_image5.png'),
+        require('@assets/images/chick_image6.png'),
+      ];
+    default:
+      return [
+        require('@assets/images/duck_image1.png'),
+        require('@assets/images/duck_image2.png'),
+        require('@assets/images/duck_image3.png'),
+        require('@assets/images/duck_image4.png'),
+        require('@assets/images/duck_image5.png'),
+        require('@assets/images/duck_image6.png'),
+      ];
+  }
+};
 
 enum Direction {
   UP = 'UP',
@@ -34,6 +68,12 @@ enum Direction {
 }
 
 export default function SnakeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
+  const currentPetImage = usePetStore(state => state.currentPetImage);
+  const currentPetId = usePetStore(state => state.currentPetId);
+  
+  // 현재 동물 ID 사용 (기본값: 오리)
+  const currentAnimalId = currentPetId || 2;
+  const animalImages = getAnimalImages(currentAnimalId);
   const [snake, setSnake] = useState<Position[]>([
     { x: 7, y: 10, imageIndex: 0, id: 'segment-0' }
   ]);
@@ -212,7 +252,7 @@ export default function SnakeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
                   ]}
                 >
                   <Image
-                    source={DUCK_IMAGES[segment.imageIndex]}
+                    source={animalImages[segment.imageIndex]}
                     style={styles.duckImage}
                     resizeMode="contain"
                   />

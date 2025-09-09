@@ -24,17 +24,13 @@ export default function MainScreen() {
   const navigation = useNavigation<NavigationProp>();
   // 현재 화면에 있는 동물 뽑기
   const setCurrentPetImage = usePetStore(state => state.setCurrentPetImage);
+  const setCurrentPetId = usePetStore(state => state.setCurrentPetId);
   const [currentPetIndex, setCurrentPetIndex] = useState(0);
 
   const [visibleModal, setVisibleModal] = useState<null | 'feed' | 'play' | 'gift'>(null);
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
-  // const setUserId = useUserStore((state) => state.setUserId);
-
-  // useEffect(() => {
-  //   setUserId('004f448c-3b15-489a-a5ce-f87dc53fbbe8');
-  // }, []);
   const [money, setMoney] = useState<number>(0);
 
   // 동물 info
@@ -157,7 +153,8 @@ export default function MainScreen() {
           style={{ width: 100, height: 50, marginLeft: -15 }} 
           onPress={() => {
             console.log("게임 버튼 클릭됨");
-            setCurrentPetImage(pets[currentPetIndex].image);
+            setCurrentPetImage(pets[currentAnimalIndex].image);
+            setCurrentPetId(pets[currentAnimalIndex].id);
             navigation.navigate('GameScreen');
           }}
         />
