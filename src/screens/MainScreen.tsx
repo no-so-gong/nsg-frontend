@@ -25,6 +25,7 @@ export default function MainScreen() {
   // 현재 화면에 있는 동물 뽑기
   const setCurrentPetImage = usePetStore(state => state.setCurrentPetImage);
   const setCurrentPetId = usePetStore(state => state.setCurrentPetId);
+  const setCurrentPetEvolutionStage = usePetStore(state => state.setCurrentPetEvolutionStage);
   const [currentPetIndex, setCurrentPetIndex] = useState(0);
 
   const [visibleModal, setVisibleModal] = useState<null | 'feed' | 'play' | 'gift'>(null);
@@ -153,8 +154,13 @@ export default function MainScreen() {
           style={{ width: 100, height: 50, marginLeft: -15 }} 
           onPress={() => {
             console.log("게임 버튼 클릭됨");
-            setCurrentPetImage(pets[currentAnimalIndex].image);
-            setCurrentPetId(pets[currentAnimalIndex].id);
+            const currentPet = pets[currentAnimalIndex];
+            const emotion = currentPet.info?.currentEmotion ?? 0;
+            const actualDisplayedImage = getAnimalImageByEmotion(currentPet.id, Math.floor(emotion));
+            
+            setCurrentPetImage(actualDisplayedImage);
+            setCurrentPetId(currentPet.id);
+            setCurrentPetEvolutionStage(currentPet.info?.evolutionStage || 1);
             navigation.navigate('GameScreen');
           }}
         />

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
 import usePetStore from '@zustand/usePetStore';
+import { getAnimalImageByEvolutionStage } from '@/components/animalImages';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -64,7 +65,14 @@ interface Piece {
 }
 
 export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
-  const currentPetImage = usePetStore(state => state.currentPetImage);
+  const storedPetImage = usePetStore(state => state.currentPetImage);
+  const currentPetId = usePetStore(state => state.currentPetId);
+  const currentPetEvolutionStage = usePetStore(state => state.currentPetEvolutionStage);
+  
+  const currentPetImage = storedPetImage || 
+    (currentPetId && currentPetEvolutionStage 
+      ? getAnimalImageByEvolutionStage(currentPetId, currentPetEvolutionStage)
+      : require('@assets/images/chick_image3.png'));
   const [board, setBoard] = useState<Board>(() => 
     Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(null))
   );

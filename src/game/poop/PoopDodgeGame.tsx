@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
 import usePetStore from '@zustand/usePetStore';
+import { getAnimalImageByEvolutionStage } from '@/components/animalImages';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type GameObject = { id: string; x: number; y: number; sx: number; sy: number; move: number; image: any; };
@@ -26,7 +27,14 @@ const createAlien = (difficulty: number): GameObject => ({
 });
 
 export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
-  const playerImage = usePetStore(state => state.currentPetImage);
+  const storedPetImage = usePetStore(state => state.currentPetImage);
+  const currentPetId = usePetStore(state => state.currentPetId);
+  const currentPetEvolutionStage = usePetStore(state => state.currentPetEvolutionStage);
+  
+  const playerImage = storedPetImage || 
+    (currentPetId && currentPetEvolutionStage 
+      ? getAnimalImageByEvolutionStage(currentPetId, currentPetEvolutionStage)
+      : require('@assets/images/shiba_image6.png'));
   const [player, setPlayer] = useState<GameObject | null>(null);
   const playerRef = useRef<GameObject>(player);
   const [aliens, setAliens] = useState<GameObject[]>([]);

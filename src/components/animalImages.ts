@@ -33,3 +33,11 @@ export const getAnimalImageByEmotion = (animalId: number, emotion: number) => {
   const found = images.find(img => emotion >= img.range[0] && emotion <= img.range[1]);
   return found ? found.image : images[0].image;
 };
+
+export const getAnimalImageByEvolutionStage = (animalId: number, evolutionStage: number) => {
+  const images = animalImages[animalId];
+  if (!images) return null;
+  
+  const clampedStage = Math.max(1, Math.min(6, evolutionStage));
+  return images[clampedStage - 1]?.image || images[0].image;
+};
