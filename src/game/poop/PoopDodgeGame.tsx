@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
+
 import { getAnimalImage } from '@/game/common/animalImages';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -42,18 +43,19 @@ export default function PoopDodgeGame({ currentAnimal, currentAnimalEmotion, onG
     const p = createPlayer(currentAnimal, currentAnimalEmotion);
     setPlayer(p);
     playerRef.current = p;
-    setAliens([]);
-    setDodgedCount(0);
-    setTime(0);
-    setIsGameOver(false);
-    setRunning(true);
-    setShowStartScreen(false);
+      setAliens([]);
+      setDodgedCount(0);
+      setTime(0);
+      setIsGameOver(false);
+      setRunning(true);
+      setShowStartScreen(false);
   };
 
   // 점수 업데이트
   useEffect(() => {
     onScoreUpdate(dodgedCount);
   }, [dodgedCount, onScoreUpdate]);
+
   // 게임 루프
 useEffect(() => {
   if (!running) return;
@@ -156,7 +158,6 @@ useEffect(() => {
           <Text style={styles.hudLeft}>피한 똥: {dodgedCount}</Text>
           <Text style={styles.hudRight}>시간: {time}</Text>
         </View>
-
 
 {player && (
   <Image
