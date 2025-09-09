@@ -31,27 +31,34 @@ export default function MainScreen() {
   const [shibaInfo, setShibaInfo] = useState<PetInfo | null>(null);
   const [duckInfo, setDuckInfo] = useState<PetInfo | null>(null);
   const [chickInfo, setChickInfo] = useState<PetInfo | null>(null);
+
   // 동물 Carousel 배열
   const pets = [
     { id: 1, info: shibaInfo, image: require('@assets/images/shiba_image4.png') },
     { id: 2, info: duckInfo, image: require('@assets/images/duck_image4.png') },
     { id: 3, info: chickInfo, image: require('@assets/images/chick_image4.png') },
   ];
+  
   // 출석 모달 상태
   const [isAttendanceVisible, setIsAttendanceVisible] = useState(true);
+  
   // 상점 모달 상태
   const [isCategoryVisible, setIsCategoryVisible] = useState(true);
 
-  // 추후에 해당 화면의 animalId에 따라 Info를 선택해서 currentPetInfo에 주입
-  // const getCurrentPetInfo = (animalId: number): PetInfo | null => {
-  //   switch (animalId) {
-  //     case 1: return shibaInfo;
-  //     case 2: return duckInfo;
-  //     case 3: return chickInfo;
-  //     default: return null;
-  //   }
-  // };
-  // const currentPetInfo = getCurrentPetInfo(currentAnimalId);
+  // 현재 렌더링 중인 동물 인덱스 상태
+  const [currentAnimalIndex, setCurrentAnimalIndex] = useState(0);
+
+  // 현재 동물 정보를 가져오는 함수
+  const getCurrentPetInfo = (): PetInfo | null => {
+    switch (currentAnimalIndex) {
+      case 0: return shibaInfo;
+      case 1: return duckInfo;
+      case 2: return chickInfo;
+      default: return null;
+    }
+  };
+
+  const currentPetInfo = getCurrentPetInfo();
 
   // 동물의 info에 정보 불러오기
   useEffect(() => {
@@ -108,7 +115,7 @@ export default function MainScreen() {
           {/* 감정 게이지 - 좌측 */}
           <View style={styles.leftGauge}>
             <EmotionAffinityGauge
-              value={shibaInfo?.currentEmotion ? Math.floor(shibaInfo.currentEmotion) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+              value={currentPetInfo?.currentEmotion ? Math.floor(currentPetInfo.currentEmotion) : 0}
               icon={require('@assets/icons/heart.png')} // 현재 기분
             />
           </View>
@@ -116,7 +123,7 @@ export default function MainScreen() {
           {/* 편애도 게이지 - 중앙 */}
           <View style={styles.centerGauge}>
             <EmotionAffinityGauge
-              value={shibaInfo?.userPatternBias ? Math.floor(shibaInfo.userPatternBias * 100) : 0} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+              value={currentPetInfo?.userPatternBias ? Math.floor(currentPetInfo.userPatternBias * 100) : 0}
               icon={require('@assets/icons/friend.png')} // 편애도
             />
           </View>
@@ -163,6 +170,10 @@ export default function MainScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ alignItems: 'center' }}
+        onMomentumScrollEnd={(event) => {
+          const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+          setCurrentAnimalIndex(index);
+        }}
         renderItem={({ item }) => {
           const emotion = item.info?.currentEmotion ?? 0; 
           const animalImage = getAnimalImageByEmotion(item.id, Math.floor(emotion));
@@ -170,7 +181,7 @@ export default function MainScreen() {
             <View style={{ width: SCREEN_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
               <Image source={animalImage} style={styles.animalImage} resizeMode="contain" />
               <BoneLabelSvg
-                label={shibaInfo?.name ? shibaInfo.name : "미정"} // 추후: 어떤 동물이 나와 있는 페이지냐에 따라 shibaInfo, duckInfo, chickInfo를 가져와야 함
+                label={item.info?.name ? item.info.name : "미정"}
                 widthRatio={0.2}
                 style={styles.userName}
               />
@@ -232,7 +243,7 @@ const styles = StyleSheet.create({
   },
   userGameWrapper: {
     position: 'absolute',
-    top: 110,
+    top: 140,
     left: 24,
     alignItems: 'center',
     gap: 20,

@@ -4,6 +4,7 @@ import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import MinigameWrapper from '@/components/minigames/MinigameWrapper';
 import TetrisGame from '@/game/tetris/TetrisGame';
 import PoopDodgeGame from '@/game/poop/PoopDodgeGame';
+import SnakeGame from '@/game/snake/SnakeGame';
 import useUserStore from '@zustand/useUserStore';
 
 export default function GameScreen({ navigation }: any) {
@@ -45,6 +46,14 @@ export default function GameScreen({ navigation }: any) {
             <Text style={styles.gameButtonText}>💩</Text>
             <Text style={styles.gameButtonLabel}>똥 피하기</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gameButton}
+            onPress={() => setSelectedGame('snake')}
+          >
+            <Text style={styles.gameButtonText}>🐍</Text>
+            <Text style={styles.gameButtonLabel}>스네이크</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -52,7 +61,6 @@ export default function GameScreen({ navigation }: any) {
       <MinigameWrapper
         userId={userId || ''}
         gameName="tetris"
-        maxPlaysPerDay={5}
         goldPerPoint={1}
         visible={selectedGame === 'tetris'}
         onClose={closeGame}
@@ -64,12 +72,22 @@ export default function GameScreen({ navigation }: any) {
       <MinigameWrapper
         userId={userId || ''}
         gameName="poop_dodge"
-        maxPlaysPerDay={5}
         goldPerPoint={2}
         visible={selectedGame === 'poop'}
         onClose={closeGame}
       >
         {(props) => <PoopDodgeGame {...props} />}
+      </MinigameWrapper>
+
+      {/* 스네이크 게임 */}
+      <MinigameWrapper
+        userId={userId || ''}
+        gameName="snake"
+        goldPerPoint={1}
+        visible={selectedGame === 'snake'}
+        onClose={closeGame}
+      >
+        {(props) => <SnakeGame {...props} />}
       </MinigameWrapper>
     </ImageBackground>
   );

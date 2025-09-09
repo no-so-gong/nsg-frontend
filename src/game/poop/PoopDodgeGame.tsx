@@ -12,7 +12,7 @@ const createPlayer = (): GameObject => ({
   sx: 50, 
   sy: 80, 
   move: 10, 
-  image: require('./assets/shiba_image6.png') 
+  image: require('@assets/images/shiba_image6.png') 
 });
 
 const createAlien = (difficulty: number): GameObject => ({ 
@@ -22,7 +22,7 @@ const createAlien = (difficulty: number): GameObject => ({
   sx: 40, 
   sy: 40, 
   move: 3 + difficulty * 0.5, 
-  image: require('./assets/poop.png') 
+  image: require('@assets/icons/poop.png') 
 });
 
 export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
