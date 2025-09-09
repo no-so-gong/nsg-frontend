@@ -35,8 +35,6 @@ export default function MinigameWrapper({
   const goldAnimationValue = useRef(new Animated.Value(0)).current;
   const goldScaleValue = useRef(new Animated.Value(0)).current;
 
-
-
   const handleGameEnd = async (score: number) => {
     const goldEarned = score * goldPerPoint;
     
