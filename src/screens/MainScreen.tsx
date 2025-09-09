@@ -11,20 +11,30 @@ import SVGButton from '@/components/SVGButton';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigationTypes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
+import GameScreen from '@/game/GameScreen';
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
 import { getPetInfo, PetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
 import { getAnimalImageByEmotion } from '@/components/animalImages';
-
+import usePetStore from '@zustand/usePetStore';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'>;
 
 export default function MainScreen() {
   const navigation = useNavigation<NavigationProp>();
+  // 현재 화면에 있는 동물 뽑기
+  const setCurrentPetImage = usePetStore(state => state.setCurrentPetImage);
+  const [currentPetIndex, setCurrentPetIndex] = useState(0);
+
+  const [visibleModal, setVisibleModal] = useState<null | 'feed' | 'play' | 'gift'>(null);
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
+  // const setUserId = useUserStore((state) => state.setUserId);
+
+  // useEffect(() => {
+  //   setUserId('004f448c-3b15-489a-a5ce-f87dc53fbbe8');
+  // }, []);
   const [money, setMoney] = useState<number>(0);
 
   // 동물 info
@@ -101,10 +111,9 @@ export default function MainScreen() {
 
   return (
     <>
-      {/* {isAttendanceVisible && (
+      {isAttendanceVisible && (
         <AttendanceBoard onClose={() => setIsAttendanceVisible(false)} />
-      )} */}
-      {/* <CategoryBoard onClose={() => setIsCategoryVisible}/> */}
+      )}
       <ImageBackground
         source={require('@assets/images/Main.png')}
         style={styles.background}
@@ -148,6 +157,7 @@ export default function MainScreen() {
           style={{ width: 100, height: 50, marginLeft: -15 }} 
           onPress={() => {
             console.log("게임 버튼 클릭됨");
+            setCurrentPetImage(pets[currentPetIndex].image);
             navigation.navigate('GameScreen');
           }}
         />
@@ -158,7 +168,7 @@ export default function MainScreen() {
           label="출석"
           backgroundColor="#CBA74E"
           style={{ marginLeft: -15 }}
-          // onPress={() => navigation.navigate('')}
+          onPress={() => setIsAttendanceVisible(true)}
         />
       </View>
 
@@ -186,27 +196,32 @@ export default function MainScreen() {
                 style={styles.userName}
               />
             </View>
-          );
-        }}
-      />
+          )}
+        }/>
 
         {/* 하단 액션 버튼들 */}
         <View style={styles.actionButtonRow}>
           <IconActionButton
             icon={require('@assets/icons/play.png')}
             iconSize={92}
-          // onPress={() => setVisibleModal('play')} // 추후에 누르면, 놀기 카테고리 화면 나오기
+            onPress={() => setVisibleModal('play')} // 추후에 누르면, 놀기 카테고리 화면 나오기
           />
           <IconActionButton
             icon={require('@assets/icons/feed.png')}
             iconSize={92}
-          // onPress={() => setVisibleModal('feed')} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
+            onPress={() => setVisibleModal('feed')} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
           />
           <IconActionButton
             icon={require('@assets/icons/gift.png')}
             iconSize={92}
-          // onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
+            onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
           />
+          {visibleModal && (
+            <CategoryBoard
+              category={visibleModal}
+              onClose={() => setVisibleModal(null)}
+            />
+          )}
         </View>
       </ImageBackground>
     </>

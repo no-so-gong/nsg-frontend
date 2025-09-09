@@ -8,36 +8,43 @@ import Feed1 from "@assets/icons/feed1.png";
 import Feed2 from "@assets/icons/feed2.png";
 import Feed3 from "@assets/icons/feed3.png";
 
+import Play1 from "@assets/icons/play1.png";
+import Play2 from "@assets/icons/play2.png";
+import Play3 from "@assets/icons/play3.png";
+
+import Gift1 from "@assets/icons/gift1.png";
+import Gift2 from "@assets/icons/gift2.png";
+import Gift3 from "@assets/icons/gift3.png";
 interface CategoryBoardProps {
+  category: 'feed' | 'play' | 'gift';
   onClose: () => void;
 }
 
-// 카테고리별 아이템과 이미지, 가격 정보를 객체로 관리
+// 가격 하드
 const CATEGORY_ITEMS = {
   feed: [
     { id: 1, image: Feed1, price: 30 },
-    { id: 2, image: Feed2, price: 20 },
-    { id: 3, image: Feed3, price: 30 },
+    { id: 2, image: Feed2, price: 40 },
+    { id: 3, image: Feed3, price: 50 },
   ],
   play: [
-    { id: 1, image: Feed1, price: 15 },
-    { id: 2, image: Feed2, price: 25 },
-    { id: 3, image: Feed3, price: 35 },
+    { id: 1, image: Play1, price: 30 },
+    { id: 2, image: Play2, price: 40 },
+    { id: 3, image: Play3, price: 50 },
   ],
   gift: [
-    { id: 1, image: Feed1, price: 50 },
-    { id: 2, image: Feed2, price: 60 },
-    { id: 3, image: Feed3, price: 70 },
+    { id: 1, image: Gift1, price: 30 },
+    { id: 2, image: Gift2, price: 40 },
+    { id: 3, image: Gift3, price: 50 },
   ],
 };
 
-export default function CategoryBoard({ onClose }: CategoryBoardProps) {
-  const [selectedCategory, setSelectedCategory] = useState<'feed' | 'play' | 'gift'>('feed');
-  const [categoryItems, setCategoryItems] = useState(CATEGORY_ITEMS[selectedCategory]);
+export default function CategoryBoard({ category, onClose }: CategoryBoardProps) {
+  const [categoryItems, setCategoryItems] = useState(CATEGORY_ITEMS[category]);
 
   useEffect(() => {
-    setCategoryItems(CATEGORY_ITEMS[selectedCategory]);
-  }, [selectedCategory]);
+    setCategoryItems(CATEGORY_ITEMS[category]);
+  }, [category]);
 
   const handlePurchase = () => {
     //상품 구입 API
@@ -65,7 +72,6 @@ export default function CategoryBoard({ onClose }: CategoryBoardProps) {
                   <MoneyStatus
                     value={item.price}
                     icon={require('@assets/icons/money.png')}
-                    containerStyle={{ }}
                   />
                 </View>
               ))}
@@ -121,6 +127,7 @@ const styles = StyleSheet.create({
   },
   itemWrapper: {
     alignItems: 'center',
+    width: 80
   },
   itemImage: {
     width: 80,
