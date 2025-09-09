@@ -30,6 +30,11 @@ export default function MainScreen() {
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
+  // const setUserId = useUserStore((state) => state.setUserId);
+
+  // useEffect(() => {
+  //   setUserId('004f448c-3b15-489a-a5ce-f87dc53fbbe8');
+  // }, []);
   const [money, setMoney] = useState<number>(0);
 
   // 동물 info
@@ -99,10 +104,9 @@ export default function MainScreen() {
 
   return (
     <>
-      {/* {isAttendanceVisible && (
+      {isAttendanceVisible && (
         <AttendanceBoard onClose={() => setIsAttendanceVisible(false)} />
-      )} */}
-      {/* <CategoryBoard onClose={() => setIsCategoryVisible}/> */}
+      )}
       <ImageBackground
         source={require('@assets/images/Main.png')}
         style={styles.background}
@@ -157,7 +161,7 @@ export default function MainScreen() {
           label="출석"
           backgroundColor="#CBA74E"
           style={{ marginLeft: -15 }}
-          // onPress={() => navigation.navigate('')}
+          onPress={() => setIsAttendanceVisible(true)}
         />
       </View>
 
