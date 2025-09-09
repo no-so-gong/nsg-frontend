@@ -11,17 +11,18 @@ import SVGButton from '@/components/SVGButton';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigationTypes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
 import { getPetInfo, PetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
 import { getAnimalImageByEmotion } from '@/components/animalImages';
-
+import usePetStore from '@zustand/usePetStore';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'>;
 
 export default function MainScreen() {
   const navigation = useNavigation<NavigationProp>();
+  // 현재 화면에 있는 동물 뽑기
+  const setCurrentPetImage = usePetStore(state => state.setCurrentPetImage);
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
@@ -148,7 +149,12 @@ export default function MainScreen() {
           style={{ width: 100, height: 50, marginLeft: -15 }} 
           onPress={() => {
             console.log("게임 버튼 클릭됨");
-            navigation.navigate('GameScreen', { currentAnimal: currentAnimalIndex + 1 });
+            const currentEmotion = currentPetInfo?.currentEmotion ?? 0;
+            setCurrentPetImage(pets[currentAnimalIndex].image);
+            navigation.navigate('GameScreen', { 
+              currentAnimal: currentAnimalIndex + 1,
+              currentAnimalEmotion: Math.floor(currentEmotion)
+            });
           }}
         />
         <SVGButton

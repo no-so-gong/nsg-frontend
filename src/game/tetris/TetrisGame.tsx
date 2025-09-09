@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
+import { getAnimalImage } from '@/game/common/animalImages';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -62,7 +63,7 @@ interface Piece {
   y: number;
 }
 
-export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
+export default function TetrisGame({ currentAnimal, currentAnimalEmotion, onGameEnd, onScoreUpdate }: MinigameProps) {
   const [board, setBoard] = useState<Board>(() => 
     Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(null))
   );
@@ -429,11 +430,11 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
             <View style={styles.sidePanel}>
               {nextPieces.length > 0 && renderNextPiece(nextPieces[0], 0)}
               
-              {/* 병아리 이미지 */}
-              <View style={styles.chickImageContainer}>
+              {/* 동물 이미지 */}
+              <View style={styles.animalImageContainer}>
                 <Image
-                  source={require('@assets/images/chick_image3.png')}
-                  style={styles.chickImage}
+                  source={getAnimalImage(currentAnimal, currentAnimalEmotion)}
+                  style={styles.animalImage}
                   resizeMode="contain"
                 />
               </View>
@@ -581,11 +582,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  chickImageContainer: {
+  animalImageContainer: {
     alignItems: 'center',
     marginTop: 4,
   },
-  chickImage: {
+  animalImage: {
     width: 60,
     height: 60,
   },

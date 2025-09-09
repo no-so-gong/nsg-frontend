@@ -1,5 +1,5 @@
 export type RootStackParamList = {
   InitScreen: undefined;
   MainScreen: undefined;
-  GameScreen: { currentAnimal: number };
+  GameScreen: { currentAnimal: number; currentAnimalEmotion: number };
 };

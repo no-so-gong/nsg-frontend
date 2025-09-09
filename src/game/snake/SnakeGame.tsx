@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
+import { getAnimalImages } from '@/game/common/animalImages';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -15,34 +16,6 @@ interface Position {
   imageIndex: number; // 동물 이미지 인덱스
   id: string; // 고유 ID
 }
-
-// 동물별 이미지 배열
-const ANIMAL_IMAGES = {
-  1: [ // 시바견
-    require('@assets/images/shiba_image1.png'),
-    require('@assets/images/shiba_image2.png'),
-    require('@assets/images/shiba_image3.png'),
-    require('@assets/images/shiba_image4.png'),
-    require('@assets/images/shiba_image5.png'),
-    require('@assets/images/shiba_image6.png'),
-  ],
-  2: [ // 오리
-    require('@assets/images/duck_image1.png'),
-    require('@assets/images/duck_image2.png'),
-    require('@assets/images/duck_image3.png'),
-    require('@assets/images/duck_image4.png'),
-    require('@assets/images/duck_image5.png'),
-    require('@assets/images/duck_image6.png'),
-  ],
-  3: [ // 병아리
-    require('@assets/images/chick_image1.png'),
-    require('@assets/images/chick_image2.png'),
-    require('@assets/images/chick_image3.png'),
-    require('@assets/images/chick_image4.png'),
-    require('@assets/images/chick_image5.png'),
-    require('@assets/images/chick_image6.png'),
-  ],
-};
 
 enum Direction {
   UP = 'UP',
@@ -79,7 +52,7 @@ const SnakeSegment = memo(({ segment, animalImages, cellSize }: {
   );
 });
 
-export default function SnakeGame({ currentAnimal, onGameEnd, onScoreUpdate }: MinigameProps) {
+export default function SnakeGame({ currentAnimal, currentAnimalEmotion, onGameEnd, onScoreUpdate }: MinigameProps) {
   const [snake, setSnake] = useState<Position[]>([
     { x: 7, y: 10, imageIndex: 0, id: `segment-init-${Date.now()}` }
   ]);
@@ -87,7 +60,7 @@ export default function SnakeGame({ currentAnimal, onGameEnd, onScoreUpdate }: M
   
   // 현재 동물에 해당하는 이미지 배열 가져오기 (useMemo로 최적화)
   const currentAnimalImages = useMemo(() => {
-    return ANIMAL_IMAGES[currentAnimal as keyof typeof ANIMAL_IMAGES] || ANIMAL_IMAGES[2]; // 기본값: 오리
+    return getAnimalImages(currentAnimal);
   }, [currentAnimal]);
   const [food, setFood] = useState<{ x: number; y: number }>({ x: 5, y: 5 });
   const [direction, setDirection] = useState<Direction>(Direction.RIGHT);

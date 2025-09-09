@@ -11,8 +11,10 @@ export default function GameScreen({ navigation, route }: any) {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const userId = useUserStore((state) => state.userId);
   const currentAnimal = route?.params?.currentAnimal || 1;
+  const currentAnimalEmotion = route?.params?.currentAnimalEmotion || 0;
 
   const closeGame = () => {
+    console.log(`게임 종료 - 사용자 ID: ${userId}`);
     setSelectedGame(null);
   };
 
@@ -34,7 +36,10 @@ export default function GameScreen({ navigation, route }: any) {
         <View style={styles.gameGrid}>
           <TouchableOpacity
             style={styles.gameButton}
-            onPress={() => setSelectedGame('tetris')}
+            onPress={() => {
+              console.log(`테트리스 게임 시작 - 사용자 ID: ${userId}`);
+              setSelectedGame('tetris');
+            }}
           >
             <Text style={styles.gameButtonText}>🧱</Text>
             <Text style={styles.gameButtonLabel}>테트리스</Text>
@@ -42,7 +47,10 @@ export default function GameScreen({ navigation, route }: any) {
 
           <TouchableOpacity
             style={styles.gameButton}
-            onPress={() => setSelectedGame('poop')}
+            onPress={() => {
+              console.log(`똥 피하기 게임 시작 - 사용자 ID: ${userId}`);
+              setSelectedGame('poop');
+            }}
           >
             <Text style={styles.gameButtonText}>💩</Text>
             <Text style={styles.gameButtonLabel}>똥 피하기</Text>
@@ -50,7 +58,10 @@ export default function GameScreen({ navigation, route }: any) {
 
           <TouchableOpacity
             style={styles.gameButton}
-            onPress={() => setSelectedGame('snake')}
+            onPress={() => {
+              console.log(`스네이크 게임 시작 - 사용자 ID: ${userId}`);
+              setSelectedGame('snake');
+            }}
           >
             <Text style={styles.gameButtonText}>🐍</Text>
             <Text style={styles.gameButtonLabel}>스네이크</Text>
@@ -62,6 +73,7 @@ export default function GameScreen({ navigation, route }: any) {
       <MinigameWrapper
         userId={userId || ''}
         currentAnimal={currentAnimal}
+        currentAnimalEmotion={currentAnimalEmotion}
         gameName="tetris"
         goldPerPoint={1}
         visible={selectedGame === 'tetris'}
@@ -74,6 +86,7 @@ export default function GameScreen({ navigation, route }: any) {
       <MinigameWrapper
         userId={userId || ''}
         currentAnimal={currentAnimal}
+        currentAnimalEmotion={currentAnimalEmotion}
         gameName="poop_dodge"
         goldPerPoint={2}
         visible={selectedGame === 'poop'}
@@ -86,6 +99,7 @@ export default function GameScreen({ navigation, route }: any) {
       <MinigameWrapper
         userId={userId || ''}
         currentAnimal={currentAnimal}
+        currentAnimalEmotion={currentAnimalEmotion}
         gameName="snake"
         goldPerPoint={1}
         visible={selectedGame === 'snake'}
