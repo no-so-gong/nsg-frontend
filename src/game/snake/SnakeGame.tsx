@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
 
@@ -12,19 +12,37 @@ const CELL_SIZE = Math.min(SCREEN_WIDTH * 0.95 / BOARD_WIDTH, (SCREEN_HEIGHT * 0
 interface Position {
   x: number;
   y: number;
-  imageIndex: number; // 오리 이미지 인덱스
+  imageIndex: number; // 동물 이미지 인덱스
   id: string; // 고유 ID
 }
 
-// 오리 이미지 배열
-const DUCK_IMAGES = [
-  require('@assets/images/duck_image1.png'),
-  require('@assets/images/duck_image2.png'),
-  require('@assets/images/duck_image3.png'),
-  require('@assets/images/duck_image4.png'),
-  require('@assets/images/duck_image5.png'),
-  require('@assets/images/duck_image6.png'),
-];
+// 동물별 이미지 배열
+const ANIMAL_IMAGES = {
+  1: [ // 시바견
+    require('@assets/images/shiba_image1.png'),
+    require('@assets/images/shiba_image2.png'),
+    require('@assets/images/shiba_image3.png'),
+    require('@assets/images/shiba_image4.png'),
+    require('@assets/images/shiba_image5.png'),
+    require('@assets/images/shiba_image6.png'),
+  ],
+  2: [ // 오리
+    require('@assets/images/duck_image1.png'),
+    require('@assets/images/duck_image2.png'),
+    require('@assets/images/duck_image3.png'),
+    require('@assets/images/duck_image4.png'),
+    require('@assets/images/duck_image5.png'),
+    require('@assets/images/duck_image6.png'),
+  ],
+  3: [ // 병아리
+    require('@assets/images/chick_image1.png'),
+    require('@assets/images/chick_image2.png'),
+    require('@assets/images/chick_image3.png'),
+    require('@assets/images/chick_image4.png'),
+    require('@assets/images/chick_image5.png'),
+    require('@assets/images/chick_image6.png'),
+  ],
+};
 
 enum Direction {
   UP = 'UP',
@@ -33,11 +51,44 @@ enum Direction {
   RIGHT = 'RIGHT',
 }
 
-export default function SnakeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
+// 최적화된 뱀 세그먼트 컴포넌트
+const SnakeSegment = memo(({ segment, animalImages, cellSize }: {
+  segment: Position;
+  animalImages: any[];
+  cellSize: number;
+}) => {
+  return (
+    <View
+      style={[
+        styles.snakeSegment,
+        {
+          left: segment.x * cellSize,
+          top: segment.y * cellSize,
+          width: cellSize - 1,
+          height: cellSize - 1,
+        },
+      ]}
+    >
+      <Image
+        source={animalImages[segment.imageIndex]}
+        style={styles.animalImage}
+        resizeMode="contain"
+        fadeDuration={0}
+      />
+    </View>
+  );
+});
+
+export default function SnakeGame({ currentAnimal, onGameEnd, onScoreUpdate }: MinigameProps) {
   const [snake, setSnake] = useState<Position[]>([
-    { x: 7, y: 10, imageIndex: 0, id: 'segment-0' }
+    { x: 7, y: 10, imageIndex: 0, id: `segment-init-${Date.now()}` }
   ]);
   const segmentIdCounter = useRef(1);
+  
+  // 현재 동물에 해당하는 이미지 배열 가져오기 (useMemo로 최적화)
+  const currentAnimalImages = useMemo(() => {
+    return ANIMAL_IMAGES[currentAnimal as keyof typeof ANIMAL_IMAGES] || ANIMAL_IMAGES[2]; // 기본값: 오리
+  }, [currentAnimal]);
   const [food, setFood] = useState<{ x: number; y: number }>({ x: 5, y: 5 });
   const [direction, setDirection] = useState<Direction>(Direction.RIGHT);
   const [score, setScore] = useState(0);
@@ -68,7 +119,7 @@ export default function SnakeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
   // 게임 시작
   const startGame = useCallback(() => {
     const initialSnake = [
-      { x: 7, y: 10, imageIndex: 0, id: 'segment-0' }
+      { x: 7, y: 10, imageIndex: 0, id: `segment-${Date.now()}-0` }
     ];
     setSnake(initialSnake);
     setFood(generateFood(initialSnake));
@@ -85,12 +136,12 @@ export default function SnakeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
 
     const gameLoop = () => {
       setSnake(currentSnake => {
-        // 새로운 머리 위치 계산 (기존 머리와 같은 이미지 유지)
+        // 새로운 머리 위치 계산
         const newHead = { 
           x: currentSnake[0].x, 
           y: currentSnake[0].y,
-          imageIndex: currentSnake[0].imageIndex,
-          id: `segment-${segmentIdCounter.current++}`
+          imageIndex: 0, // 임시값, 나중에 설정
+          id: `segment-${Date.now()}-${segmentIdCounter.current++}`
         };
 
         // 방향에 따라 머리 이동
@@ -131,16 +182,17 @@ export default function SnakeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
           // 먹이를 먹었을 때: 뱀이 길어짐
           // 새로운 머리에 랜덤 이미지 설정
           newHead.imageIndex = Math.floor(Math.random() * 6);
-          // 새로운 머리 추가하고 꼬리는 제거하지 않음 (길이 증가)
+          // 기존 뱀 세그먼트들은 그대로 유지 (이미지 인덱스 변경 없음)
           const newSnake = [newHead, ...currentSnake];
           
           setFood(generateFood(newSnake));
           return newSnake;
         } else {
           // 먹이를 먹지 않았을 때: 길이 유지
-          const newSnake = [...currentSnake];
-          newSnake.unshift(newHead); // 새 머리 추가
-          newSnake.pop(); // 꼬리 제거
+          // 새로운 머리에는 기존 머리와 같은 이미지 유지
+          newHead.imageIndex = currentSnake[0].imageIndex;
+          // 기존 세그먼트들을 그대로 이어받되 마지막 꼬리만 제거
+          const newSnake = [newHead, ...currentSnake.slice(0, -1)];
           return newSnake;
         }
       });
@@ -198,25 +250,13 @@ export default function SnakeGame({ onGameEnd, onScoreUpdate }: MinigameProps) {
               height: BOARD_HEIGHT * CELL_SIZE 
             }]}>
               {/* 뱀 렌더링 */}
-              {snake.map((segment, index) => (
-                <View
+              {snake.map((segment) => (
+                <SnakeSegment
                   key={segment.id}
-                  style={[
-                    styles.snakeSegment,
-                    {
-                      left: segment.x * CELL_SIZE,
-                      top: segment.y * CELL_SIZE,
-                      width: CELL_SIZE - 1,
-                      height: CELL_SIZE - 1,
-                    },
-                  ]}
-                >
-                  <Image
-                    source={DUCK_IMAGES[segment.imageIndex]}
-                    style={styles.duckImage}
-                    resizeMode="contain"
-                  />
-                </View>
+                  segment={segment}
+                  animalImages={currentAnimalImages}
+                  cellSize={CELL_SIZE}
+                />
               ))}
 
               {/* 음식 렌더링 */}
@@ -344,7 +384,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  duckImage: {
+  animalImage: {
     width: '100%',
     height: '100%',
   },

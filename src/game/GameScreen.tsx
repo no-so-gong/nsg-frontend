@@ -7,9 +7,10 @@ import PoopDodgeGame from '@/game/poop/PoopDodgeGame';
 import SnakeGame from '@/game/snake/SnakeGame';
 import useUserStore from '@zustand/useUserStore';
 
-export default function GameScreen({ navigation }: any) {
+export default function GameScreen({ navigation, route }: any) {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const userId = useUserStore((state) => state.userId);
+  const currentAnimal = route?.params?.currentAnimal || 1;
 
   const closeGame = () => {
     setSelectedGame(null);
@@ -60,6 +61,7 @@ export default function GameScreen({ navigation }: any) {
       {/* 테트리스 게임 */}
       <MinigameWrapper
         userId={userId || ''}
+        currentAnimal={currentAnimal}
         gameName="tetris"
         goldPerPoint={1}
         visible={selectedGame === 'tetris'}
@@ -71,6 +73,7 @@ export default function GameScreen({ navigation }: any) {
       {/* 똥 피하기 게임 */}
       <MinigameWrapper
         userId={userId || ''}
+        currentAnimal={currentAnimal}
         gameName="poop_dodge"
         goldPerPoint={2}
         visible={selectedGame === 'poop'}
@@ -82,6 +85,7 @@ export default function GameScreen({ navigation }: any) {
       {/* 스네이크 게임 */}
       <MinigameWrapper
         userId={userId || ''}
+        currentAnimal={currentAnimal}
         gameName="snake"
         goldPerPoint={1}
         visible={selectedGame === 'snake'}

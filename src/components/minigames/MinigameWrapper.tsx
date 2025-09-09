@@ -6,12 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface MinigameProps {
   userId: string;
+  currentAnimal: number;
   onGameEnd: (score: number) => void;
   onScoreUpdate: (score: number) => void;
 }
 
 interface MinigameWrapperProps {
   userId: string;
+  currentAnimal: number;
   gameName: string;
   goldPerPoint?: number;
   children: (props: MinigameProps) => React.ReactNode;
@@ -21,6 +23,7 @@ interface MinigameWrapperProps {
 
 export default function MinigameWrapper({
   userId,
+  currentAnimal,
   gameName,
   goldPerPoint = 1,
   children,
@@ -131,6 +134,7 @@ export default function MinigameWrapper({
             {/* 게임 UI */}
             {children({
               userId,
+              currentAnimal,
               onGameEnd: handleGameEnd,
               onScoreUpdate: handleScoreUpdate,
             })}

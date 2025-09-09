@@ -148,7 +148,7 @@ export default function MainScreen() {
           style={{ width: 100, height: 50, marginLeft: -15 }} 
           onPress={() => {
             console.log("게임 버튼 클릭됨");
-            navigation.navigate('GameScreen');
+            navigation.navigate('GameScreen', { currentAnimal: currentAnimalIndex + 1 });
           }}
         />
         <SVGButton
