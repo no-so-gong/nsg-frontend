@@ -26,6 +26,8 @@ export default function MainScreen() {
   const setCurrentPetImage = usePetStore(state => state.setCurrentPetImage);
   const [currentPetIndex, setCurrentPetIndex] = useState(0);
 
+  const [visibleModal, setVisibleModal] = useState<null | 'feed' | 'play' | 'gift'>(null);
+
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
   const [money, setMoney] = useState<number>(0);
@@ -183,18 +185,24 @@ export default function MainScreen() {
           <IconActionButton
             icon={require('@assets/icons/play.png')}
             iconSize={92}
-          // onPress={() => setVisibleModal('play')} // 추후에 누르면, 놀기 카테고리 화면 나오기
+            onPress={() => setVisibleModal('play')} // 추후에 누르면, 놀기 카테고리 화면 나오기
           />
           <IconActionButton
             icon={require('@assets/icons/feed.png')}
             iconSize={92}
-          // onPress={() => setVisibleModal('feed')} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
+            onPress={() => setVisibleModal('feed')} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
           />
           <IconActionButton
             icon={require('@assets/icons/gift.png')}
             iconSize={92}
-          // onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
+            onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
           />
+          {visibleModal && (
+            <CategoryBoard
+              category={visibleModal}
+              onClose={() => setVisibleModal(null)}
+            />
+          )}
         </View>
       </ImageBackground>
     </>
