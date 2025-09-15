@@ -3,13 +3,21 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
+    "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"],
-      "@config/*": ["./config/*"],
-      "@assets/*": ["./assets/*"],
-      "@zustand/*": ["./zustand/*"],
+      "@/*": [
+        "./src/*"
+      ],
+      "@config/*": [
+        "./config/*"
+      ],
+      "@assets/*": [
+        "./assets/*"
+      ],
+      "@zustand/*": [
+        "./zustand/*"
+      ],
     },
     "esModuleInterop": true
   }
 }
-
