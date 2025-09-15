@@ -18,6 +18,7 @@ import { getPetInfo, PetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
 import { getAnimalImageByEmotion } from '@/components/animalImages';
 import usePetStore from '@zustand/usePetStore';
+import useMoneyStore from '@zustand/useMoneyStore';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'>;
 
 export default function MainScreen() {
@@ -32,7 +33,8 @@ export default function MainScreen() {
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
-  const [money, setMoney] = useState<number>(0);
+  const setMoneyStore = useMoneyStore(state => state.setMoney);
+  const moneyStoreValue = useMoneyStore(state => state.money);
 
   // 동물 info
   const [shibaInfo, setShibaInfo] = useState<PetInfo | null>(null);
@@ -45,10 +47,10 @@ export default function MainScreen() {
     { id: 2, info: duckInfo, image: require('@assets/images/duck_image4.png') },
     { id: 3, info: chickInfo, image: require('@assets/images/chick_image4.png') },
   ];
-  
+
   // 출석 모달 상태
   const [isAttendanceVisible, setIsAttendanceVisible] = useState(true);
-  
+
   // 상점 모달 상태
   const [isCategoryVisible, setIsCategoryVisible] = useState(true);
 
@@ -97,7 +99,7 @@ export default function MainScreen() {
 
       try {
         const userProperty = await getUserProperty(userId);
-        setMoney(userProperty.money);
+        setMoneyStore(userProperty.money);
       } catch (error) {
         console.error('골드 조회 실패:', error);
       }
@@ -136,88 +138,101 @@ export default function MainScreen() {
 
           {/* 보유 돈 컴포넌트 자리 - 우측 */}
           <View style={styles.rightGauge}>
-            <MoneyStatus
-              value={money}
-              icon={require('@assets/icons/money.png')}
-            />
+            <MoneyStatus icon={require('@assets/icons/money.png')} />
           </View>
         </View>
 
-       {/* 유저 버튼 및 게임 버튼 */}
-       <View style={[styles.userGameWrapper, { zIndex: 10 }]}>
-        <SVGButton
-          iconName="gamepad-variant"
-          iconSize={30}
-          iconColor="#fff"
-          label="게임"
-          backgroundColor="#CBA74E"
-          style={{ width: 100, height: 50, marginLeft: -15 }} 
-          onPress={() => {
-            console.log("게임 버튼 클릭됨");
-            const currentPet = pets[currentAnimalIndex];
-            const emotion = currentPet.info?.currentEmotion ?? 0;
-            const actualDisplayedImage = getAnimalImageByEmotion(currentPet.id, Math.floor(emotion));
-            
-            setCurrentPetImage(actualDisplayedImage);
-            setCurrentPetId(currentPet.id);
-            setCurrentPetEvolutionStage(currentPet.info?.evolutionStage || 1);
-            navigation.navigate('GameScreen');
-          }}
-        />
-        <SVGButton
-          iconName="calendar-check"
-          iconSize={28}
-          iconColor="#fff"
-          label="출석"
-          backgroundColor="#CBA74E"
-          style={{ marginLeft: -15 }}
-          onPress={() => setIsAttendanceVisible(true)}
-        />
-      </View>
+        {/* 유저 버튼 및 게임 버튼 */}
+        <View style={[styles.userGameWrapper, { zIndex: 10 }]}>
+          <SVGButton
+            iconName="gamepad-variant"
+            iconSize={30}
+            iconColor="#fff"
+            label="게임"
+            backgroundColor="#CBA74E"
+            style={{ width: 100, height: 50, marginLeft: -15 }}
+            onPress={() => {
+              console.log("게임 버튼 클릭됨");
+              const currentPet = pets[currentAnimalIndex];
+              const emotion = currentPet.info?.currentEmotion ?? 0;
+              const actualDisplayedImage = getAnimalImageByEmotion(currentPet.id, Math.floor(emotion));
 
-      {/* 중앙 동물 */}
-      <FlatList
-        data={pets}
-        keyExtractor={(item) => item.id.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ alignItems: 'center' }}
-        onMomentumScrollEnd={(event) => {
-          const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-          setCurrentAnimalIndex(index);
-        }}
-        renderItem={({ item }) => {
-          const emotion = item.info?.currentEmotion ?? 0; 
-          const animalImage = getAnimalImageByEmotion(item.id, Math.floor(emotion));
-          return (
-            <View style={{ width: SCREEN_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
-              <Image source={animalImage} style={styles.animalImage} resizeMode="contain" />
-              <BoneLabelSvg
-                label={item.info?.name ? item.info.name : "미정"}
-                widthRatio={0.2}
-                style={styles.userName}
-              />
-            </View>
-          )}
-        }/>
+              setCurrentPetImage(actualDisplayedImage);
+              setCurrentPetId(currentPet.id);
+              setCurrentPetEvolutionStage(currentPet.info?.evolutionStage || 1);
+              navigation.navigate('GameScreen');
+            }}
+          />
+          <SVGButton
+            iconName="calendar-check"
+            iconSize={28}
+            iconColor="#fff"
+            label="출석"
+            backgroundColor="#CBA74E"
+            style={{ marginLeft: -15 }}
+            onPress={() => setIsAttendanceVisible(true)}
+          />
+        </View>
+
+        {/* 중앙 동물 */}
+        <FlatList
+          data={pets}
+          keyExtractor={(item) => item.id.toString()}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ alignItems: 'center' }}
+          onMomentumScrollEnd={(event) => {
+            const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+            setCurrentAnimalIndex(index);
+          }}
+          renderItem={({ item }) => {
+            const emotion = item.info?.currentEmotion ?? 0;
+            const animalImage = getAnimalImageByEmotion(item.id, Math.floor(emotion));
+            return (
+              <View style={{ width: SCREEN_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
+                <Image source={animalImage} style={styles.animalImage} resizeMode="contain" />
+                <BoneLabelSvg
+                  label={item.info?.name ? item.info.name : "미정"}
+                  widthRatio={0.2}
+                  style={styles.userName}
+                />
+              </View>
+            )
+          }
+          } />
 
         {/* 하단 액션 버튼들 */}
         <View style={styles.actionButtonRow}>
           <IconActionButton
             icon={require('@assets/icons/play.png')}
             iconSize={92}
-            onPress={() => setVisibleModal('play')} // 추후에 누르면, 놀기 카테고리 화면 나오기
+            onPress={() => {
+              const pet = pets[currentAnimalIndex];
+              setCurrentPetId(pet.id);
+              setCurrentPetEvolutionStage(pet.info?.evolutionStage || 1);
+              setVisibleModal('play');
+            }} // 추후에 누르면, 놀기 카테고리 화면 나오기
           />
           <IconActionButton
             icon={require('@assets/icons/feed.png')}
             iconSize={92}
-            onPress={() => setVisibleModal('feed')} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
+            onPress={() => {
+              const pet = pets[currentAnimalIndex];
+              setCurrentPetId(pet.id);
+              setCurrentPetEvolutionStage(pet.info?.evolutionStage || 1);
+              setVisibleModal('feed');
+            }} // 추후에 누르면, 밥 주기 카테고리 화면 나오기
           />
           <IconActionButton
             icon={require('@assets/icons/gift.png')}
             iconSize={92}
-            onPress={() => setVisibleModal('gift')} // 추후에 누르면, 선물하기 카테고리 화면 나오기
+            onPress={() => {
+              const pet = pets[currentAnimalIndex];
+              setCurrentPetId(pet.id);
+              setCurrentPetEvolutionStage(pet.info?.evolutionStage || 1);
+              setVisibleModal('gift');
+            }} // 추후에 누르면, 선물하기 카테고리 화면 나오기
           />
           {visibleModal && (
             <CategoryBoard
