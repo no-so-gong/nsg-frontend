@@ -68,12 +68,12 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
   const storedPetImage = usePetStore(state => state.currentPetImage);
   const currentPetId = usePetStore(state => state.currentPetId);
   const currentPetEvolutionStage = usePetStore(state => state.currentPetEvolutionStage);
-  
-  const currentPetImage = storedPetImage || 
-    (currentPetId && currentPetEvolutionStage 
+
+  const currentPetImage = storedPetImage ||
+    (currentPetId && currentPetEvolutionStage
       ? getAnimalImageByEvolutionStage(currentPetId, currentPetEvolutionStage)
       : require('@assets/images/chick_image3.png'));
-  const [board, setBoard] = useState<Board>(() => 
+  const [board, setBoard] = useState<Board>(() =>
     Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(null))
   );
   const [currentPiece, setCurrentPiece] = useState<Piece | null>(null);
@@ -84,10 +84,11 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
   const [gameOver, setGameOver] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSoftDropping, setIsSoftDropping] = useState(false);
-  
+
   const gameLoopRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const dropSpeedRef = useRef(1000);
   const moveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const dropPieceRef = useRef<() => void>(() => { });
 
   // 새로운 블록 생성
   const createPiece = useCallback((): Piece => {
@@ -113,12 +114,12 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
   // 다음 블록 가져오기
   const getNextPiece = useCallback(() => {
     if (nextPieces.length === 0) return createPiece();
-    
+
     const nextPiece = nextPieces[0];
     const remainingPieces = nextPieces.slice(1);
     remainingPieces.push(createPiece());
     setNextPieces(remainingPieces);
-    
+
     return nextPiece;
   }, [nextPieces, createPiece]);
 
@@ -137,7 +138,7 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
         if (piece.shape[y][x]) {
           const newX = piece.x + x + dx;
           const newY = piece.y + y + dy;
-          
+
           if (newX < 0 || newX >= BOARD_WIDTH || newY >= BOARD_HEIGHT) {
             return false;
           }
@@ -158,9 +159,9 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
         if (piece.shape[y][x]) {
           const boardY = piece.y + y;
           const boardX = piece.x + x;
-          if (boardY >= 0 && boardY < BOARD_HEIGHT && 
-              boardX >= 0 && boardX < BOARD_WIDTH && 
-              newBoard[boardY]) {
+          if (boardY >= 0 && boardY < BOARD_HEIGHT &&
+            boardX >= 0 && boardX < BOARD_WIDTH &&
+            newBoard[boardY]) {
             newBoard[boardY][boardX] = piece.type;
           }
         }
@@ -173,11 +174,11 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
   const clearLines = (board: Board): { newBoard: Board; linesCleared: number } => {
     const newBoard = board.filter(row => row.some(cell => cell === null));
     const linesCleared = BOARD_HEIGHT - newBoard.length;
-    
+
     while (newBoard.length < BOARD_HEIGHT) {
       newBoard.unshift(Array.from({ length: BOARD_WIDTH }, () => null));
     }
-    
+
     return { newBoard, linesCleared };
   };
 
@@ -206,14 +207,14 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
       // 블록 고정
       const newBoard = placePiece(currentPiece, board);
       const { newBoard: clearedBoard, linesCleared } = clearLines(newBoard);
-      
+
       setBoard(clearedBoard);
       setLines(prev => prev + linesCleared);
-      
+
       if (linesCleared > 0) {
-        const points = linesCleared * 50;
+        const points = linesCleared * 20;
         setScore(prev => prev + points);
-        
+
         // 레벨 업
         const newLevel = Math.floor((lines + linesCleared) / 10) + 1;
         if (newLevel > level) {
@@ -235,18 +236,25 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
     }
   }, [currentPiece, board, gameOver, score, level, lines, getNextPiece, onGameEnd]);
 
-  // 게임 루프
+  // 최신 드롭 로직을 ref에 보관
+  useEffect(() => {
+    dropPieceRef.current = dropPiece;
+  }, [dropPiece]);
+
+  // 게임 루프 (좌우 이동 등 상태 변경에도 인터벌이 재생성되지 않도록 의존성 최소화)
   useEffect(() => {
     if (isPlaying && !gameOver) {
       const speed = isSoftDropping ? Math.max(50, dropSpeedRef.current / 10) : dropSpeedRef.current;
-      gameLoopRef.current = setInterval(dropPiece, speed);
+      gameLoopRef.current = setInterval(() => {
+        dropPieceRef.current && dropPieceRef.current();
+      }, speed);
       return () => {
         if (gameLoopRef.current) {
           clearInterval(gameLoopRef.current);
         }
       };
     }
-  }, [isPlaying, gameOver, dropPiece, currentPiece, isSoftDropping]);
+  }, [isPlaying, gameOver, isSoftDropping]);
 
   // 점수 업데이트
   useEffect(() => {
@@ -255,18 +263,21 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
 
   // 조작
   const movePiece = (dx: number) => {
-    if (!currentPiece || !isPlaying) return;
-    if (isValidPosition(currentPiece, board, dx, 0)) {
-      setCurrentPiece(prev => prev ? { ...prev, x: prev.x + dx } : null);
-    }
+    if (!isPlaying) return;
+    setCurrentPiece(prev => {
+      if (!prev) return prev;
+      return isValidPosition(prev, board, dx, 0) ? { ...prev, x: prev.x + dx } : prev;
+    });
   };
 
   const rotatePieceHandler = () => {
-    if (!currentPiece || !isPlaying) return;
-    const rotated = rotatePiece(currentPiece);
-    if (isValidPosition(rotated, board)) {
-      setCurrentPiece(rotated);
-    }
+    if (!isPlaying) return;
+    setCurrentPiece(prev => {
+      if (!prev) return prev;
+      const rotated = rotatePiece(prev);
+      if (!isValidPosition(rotated, board)) return prev;
+      return rotated;
+    });
   };
 
   const hardDrop = () => {
@@ -276,18 +287,18 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
       newY++;
     }
     const droppedPiece = { ...currentPiece, y: newY };
-    
+
     // 블록을 보드에 즉시 고정
     const newBoard = placePiece(droppedPiece, board);
     const { newBoard: clearedBoard, linesCleared } = clearLines(newBoard);
-    
+
     setBoard(clearedBoard);
     setLines(prev => prev + linesCleared);
-    
+
     if (linesCleared > 0) {
-      const points = linesCleared * 50;
+      const points = linesCleared * 20;
       setScore(prev => prev + points);
-      
+
       // 레벨 업
       const newLevel = Math.floor((lines + linesCleared) / 10) + 1;
       if (newLevel > level) {
@@ -331,6 +342,8 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
   const handleSoftDropStart = () => {
     if (!isPlaying) return;
     setIsSoftDropping(true);
+    // 탭(연타) 시에도 즉시 한 칸 하강 적용
+    dropPiece();
   };
 
   const handleSoftDropEnd = () => {
@@ -340,23 +353,23 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
   // 보드와 현재 블록을 합친 렌더링용 보드
   const getRenderBoard = (): (TetrominoType | null)[][] => {
     const renderBoard = board.map(row => [...row]);
-    
+
     if (currentPiece) {
       for (let y = 0; y < currentPiece.shape.length; y++) {
         for (let x = 0; x < currentPiece.shape[y].length; x++) {
           if (currentPiece.shape[y][x]) {
             const boardY = currentPiece.y + y;
             const boardX = currentPiece.x + x;
-            if (boardY >= 0 && boardY < BOARD_HEIGHT && 
-                boardX >= 0 && boardX < BOARD_WIDTH && 
-                renderBoard[boardY]) {
+            if (boardY >= 0 && boardY < BOARD_HEIGHT &&
+              boardX >= 0 && boardX < BOARD_WIDTH &&
+              renderBoard[boardY]) {
               renderBoard[boardY][boardX] = currentPiece.type;
             }
           }
         }
       }
     }
-    
+
     return renderBoard;
   };
 
@@ -364,7 +377,7 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
   const renderNextPiece = (piece: Piece, index: number) => {
     const maxSize = Math.max(piece.shape.length, piece.shape[0]?.length || 0);
     const cellSize = CELL_SIZE / 3;
-    
+
     return (
       <View key={index} style={styles.nextPieceContainer}>
         <Text style={styles.nextLabel}>{index === 0 ? 'NEXT' : 'AFTER'}</Text>
@@ -372,9 +385,9 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
           {Array.from({ length: maxSize }, (_, y) => (
             <View key={y} style={styles.nextRow}>
               {Array.from({ length: maxSize }, (_, x) => {
-                const hasBlock = y < piece.shape.length && 
-                                 x < piece.shape[y].length && 
-                                 piece.shape[y][x];
+                const hasBlock = y < piece.shape.length &&
+                  x < piece.shape[y].length &&
+                  piece.shape[y][x];
                 return (
                   <View
                     key={x}
@@ -419,26 +432,26 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
 
               {/* 게임 보드 */}
               <View style={styles.gameBoard}>
-            {getRenderBoard().map((row, y) => (
-              <View key={y} style={styles.row}>
-                {row.map((cell, x) => (
-                  <View
-                    key={x}
-                    style={[
-                      styles.cell,
-                      { backgroundColor: cell ? COLORS[cell] : COLORS.empty }
-                    ]}
-                  />
+                {getRenderBoard().map((row, y) => (
+                  <View key={y} style={styles.row}>
+                    {row.map((cell, x) => (
+                      <View
+                        key={x}
+                        style={[
+                          styles.cell,
+                          { backgroundColor: cell ? COLORS[cell] : COLORS.empty }
+                        ]}
+                      />
+                    ))}
+                  </View>
                 ))}
-              </View>
-            ))}
               </View>
             </View>
 
             {/* 다음 블록 미리보기 */}
             <View style={styles.sidePanel}>
               {nextPieces.length > 0 && renderNextPiece(nextPieces[0], 0)}
-              
+
               {/* 펫 이미지 */}
               <View style={styles.chickImageContainer}>
                 <Image
@@ -453,8 +466,8 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
           {/* 조작 버튼 */}
           <View style={styles.controls}>
             <View style={styles.mainControls}>
-              <TouchableOpacity 
-                style={styles.controlButton} 
+              <TouchableOpacity
+                style={styles.controlButton}
                 onPressIn={() => handlePressIn('left')}
                 onPressOut={handlePressOut}
               >
@@ -463,15 +476,15 @@ export default function TetrisGame({ onGameEnd, onScoreUpdate }: MinigameProps) 
               <TouchableOpacity style={styles.controlButton} onPress={rotatePieceHandler}>
                 <Text style={styles.controlText}>↻</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.controlButton} 
+              <TouchableOpacity
+                style={styles.controlButton}
                 onPressIn={handleSoftDropStart}
                 onPressOut={handleSoftDropEnd}
               >
                 <Text style={styles.controlText}>↓</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.controlButton} 
+              <TouchableOpacity
+                style={styles.controlButton}
                 onPressIn={() => handlePressIn('right')}
                 onPressOut={handlePressOut}
               >
