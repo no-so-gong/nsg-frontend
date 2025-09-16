@@ -96,6 +96,7 @@ nsg-frontend/
 ├── .gitignore                 # Git 추적 제외 설정
 ├── package.json               # 프로젝트 메타 및 의존성
 ├── package-lock.json          # lock 파일
+├── runserver.bat              # 서버 실행 코드
 └── tsconfig.json              # TypeScript 설정
 
 ```
