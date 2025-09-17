@@ -5,6 +5,7 @@ export default {
     name: "nsg-frontend-template",
     slug: "nsg-frontend-template",
     version: "1.0.0",
+    sdkVersion: "54.0.0",
     orientation: 'portrait',
     extra: {
       API_URL: process.env.API_URL,
