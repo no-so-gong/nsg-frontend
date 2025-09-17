@@ -21,13 +21,23 @@ import usePetStore from '@zustand/usePetStore';
 import useMoneyStore from '@zustand/useMoneyStore';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'>;
 
+// 펫의 기본 정의를 상수로 관리하여 확장성 확보
+const PET_DEFINITIONS = [
+  { id: 1, defaultImage: require('@assets/images/shiba_image4.png') },
+  { id: 2, defaultImage: require('@assets/images/duck_image4.png') },
+  { id: 3, defaultImage: require('@assets/images/chick_image4.png') },
+];
+
 export default function MainScreen() {
   const navigation = useNavigation<NavigationProp>();
-  // 현재 화면에 있는 동물 뽑기
-  const setCurrentPetImage = usePetStore(state => state.setCurrentPetImage);
-  const setCurrentPetId = usePetStore(state => state.setCurrentPetId);
-  const setCurrentPetEvolutionStage = usePetStore(state => state.setCurrentPetEvolutionStage);
-  const [currentPetIndex, setCurrentPetIndex] = useState(0);
+
+  const {
+    petsInfo,
+    setCurrentPetImage,
+    setCurrentPetId,
+    setCurrentPetEvolutionStage,
+    initializePets, // 펫 정보 전체를 초기화하는 액션
+  } = usePetStore();
 
   const [visibleModal, setVisibleModal] = useState<null | 'feed' | 'play' | 'gift'>(null);
 
@@ -35,18 +45,6 @@ export default function MainScreen() {
   const userId = useUserStore((state) => state.userId);
   const setMoneyStore = useMoneyStore(state => state.setMoney);
   const moneyStoreValue = useMoneyStore(state => state.money);
-
-  // 동물 info
-  const [shibaInfo, setShibaInfo] = useState<PetInfo | null>(null);
-  const [duckInfo, setDuckInfo] = useState<PetInfo | null>(null);
-  const [chickInfo, setChickInfo] = useState<PetInfo | null>(null);
-
-  // 동물 Carousel 배열
-  const pets = [
-    { id: 1, info: shibaInfo, image: require('@assets/images/shiba_image4.png') },
-    { id: 2, info: duckInfo, image: require('@assets/images/duck_image4.png') },
-    { id: 3, info: chickInfo, image: require('@assets/images/chick_image4.png') },
-  ];
 
   // 출석 모달 상태
   const [isAttendanceVisible, setIsAttendanceVisible] = useState(true);
@@ -57,40 +55,34 @@ export default function MainScreen() {
   // 현재 렌더링 중인 동물 인덱스 상태
   const [currentAnimalIndex, setCurrentAnimalIndex] = useState(0);
 
-  // 현재 동물 정보를 가져오는 함수
-  const getCurrentPetInfo = (): PetInfo | null => {
-    switch (currentAnimalIndex) {
-      case 0: return shibaInfo;
-      case 1: return duckInfo;
-      case 2: return chickInfo;
-      default: return null;
-    }
-  };
+  const pets = PET_DEFINITIONS.map(petDef => ({
+    id: petDef.id,
+    image: petDef.defaultImage,
+    info: petsInfo[petDef.id] ?? null,
+  }));
 
-  const currentPetInfo = getCurrentPetInfo();
+  const currentPetInfo = pets[currentAnimalIndex]?.info;
 
   // 동물의 info에 정보 불러오기
   useEffect(() => {
     const fetchPetInfos = async () => {
       if (!userId) return;
-      // console.log(userId);
       try {
-        const [shiba, duck, chick] = await Promise.all([
-          getPetInfo({ animalId: 1, userId }), // 시바견 
-          getPetInfo({ animalId: 2, userId }), // 오리
-          getPetInfo({ animalId: 3, userId }), // 병아리
+        // Promise.all로 모든 펫 정보를 한 번에 가져옵니다.
+        const allPetsInfo = await Promise.all([
+          getPetInfo({ animalId: 1, userId }),
+          getPetInfo({ animalId: 2, userId }),
+          getPetInfo({ animalId: 3, userId }),
         ]);
-
-        setShibaInfo(shiba);
-        setDuckInfo(duck);
-        setChickInfo(chick);
+        // 로컬 상태(setShibaInfo 등) 대신 전역 스토어의 `initializePets` 액션을 호출합니다.
+        initializePets(allPetsInfo);
       } catch (error) {
         console.error('동물 정보 불러오기 실패:', error);
       }
     };
 
     fetchPetInfos();
-  }, [userId]); // 현재는 userId가 변경되었을 때만 api 재호출(추후에는 care가 일어나는 것도 감지해서 호출)
+  }, [userId, initializePets]);
 
   // 사용자의 보유 돈 불러오기
   useEffect(() => {
@@ -106,7 +98,7 @@ export default function MainScreen() {
     };
 
     fetchMoney();
-  }, [userId]); // 현재는 userId가 변경되었을 때만 api 재호출(추후에는 돈이 사용되는 것을 감지해서 호출)
+  }, [userId, setMoneyStore]);
 
   return (
     <>

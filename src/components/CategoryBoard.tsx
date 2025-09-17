@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, Modal, Image } from 'react-native';
+import { View, StyleSheet, Modal, Image, Animated, TouchableOpacity } from 'react-native';
 import BoneLabelSvg from './BoneLabelSvg';
 import CommonButton from './CommonButton';
 import MoneyStatus from './MoneyStatus';
@@ -19,6 +19,14 @@ import Play3 from "@assets/icons/play3.png";
 import Gift1 from "@assets/icons/gift1.png";
 import Gift2 from "@assets/icons/gift2.png";
 import Gift3 from "@assets/icons/gift3.png";
+
+import useMoneyStore from '@zustand/useMoneyStore';
+import useUserStore from '@zustand/useUserStore';
+import { performCareAction } from '@/apis/cares';
+import { processTransaction } from '@/apis/users';
+import { calculateActionId } from 'utils/actionIdCalculator';
+import { getPetInfo } from '@/apis/pets';
+
 interface CategoryBoardProps {
   category: 'feed' | 'play' | 'gift';
   onClose: () => void;
@@ -51,9 +59,24 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
   const currentPetId = usePetStore(state => state.currentPetId);
   const currentPetEvolutionStage = usePetStore(state => state.currentPetEvolutionStage);
 
+  const userId = useUserStore(state => state.userId);
+  const setMoney = useMoneyStore(state => state.setMoney);
+
+  // 사용자가 선택한 아이템의 '로컬 ID'(1, 2, 3)를 저장할 상태 → Board 뜬 순서대로 1, 2, 3.
+  const [selectedLocalItemId, setSelectedLocalItemId] = useState<number | null>(null);
+
+  // 중복 클릭 방지용 상태
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // 애니메이션을 위한 값
+  const scaleAnim = useState(new Animated.Value(1))[0]; // 초기 스케일 1
+
+  const setPetInfo = usePetStore(state => state.setPetInfo);
+
   // 카테고리 또는 동물 변경 시 가격 목록 호출
   useEffect(() => {
     setCategoryItems(CATEGORY_ITEMS[category]);
+    setSelectedLocalItemId(null); // 카테고리 변경 시 선택 초기화
   }, [category]);
 
   useEffect(() => {
@@ -62,9 +85,90 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
     fetchPrices({ category, animalId: currentPetId, evolutionStage: currentPetEvolutionStage });
   }, [category, currentPetId, currentPetEvolutionStage, fetchPrices]);
 
-  const handlePurchase = () => {
-    //상품 구입 API
-    onClose();
+  // 아이템 선택 시 애니메이션 효과
+  const handleItemSelect = (itemId: number) => {
+    setSelectedLocalItemId(itemId);
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.05, // 살짝 커짐
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1, // 다시 원래 크기로
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const handlePurchase = async () => {
+    if (isProcessing) return;
+    if (selectedLocalItemId === null) {
+      alert('구입할 상품을 선택해주세요.');
+      return;
+    }
+
+    if (currentPetId === null) {
+      alert('현재 펫 정보를 불러올 수 없습니다.');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    if (!userId) {
+      alert('사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.');
+      setIsProcessing(false);
+      return;
+    }
+
+    const selectedItemInfo = CATEGORY_ITEMS[category].find(item => item.id === selectedLocalItemId);
+    if (!selectedItemInfo) {
+      setIsProcessing(false);
+      return;
+    }
+
+    const fallbackKey = `${category}${selectedLocalItemId}`;
+    const price = pricesByCategory[category]?.[fallbackKey] ?? selectedItemInfo.price;
+
+    try {
+      // 2. processTransaction 함수로 결제 요청
+      const transactionResult = await processTransaction({
+        amount: -price,
+        source: 'care',
+      }, userId);
+
+      // 3. performCareAction 함수로 행동 요청W
+      const actionIdToSend = calculateActionId(
+        category,
+        selectedLocalItemId,
+        currentPetEvolutionStage || 1
+      );
+
+      const actionResult = await performCareAction({
+        animal_id: currentPetId,
+        action_id: actionIdToSend,
+      }, userId);
+
+      const updatedPetInfo = await getPetInfo({
+        animalId: currentPetId,
+        userId: userId
+      });
+
+      // 최신 펫 정보로 전역 스토어를 업데이트합니다.
+      setPetInfo(updatedPetInfo);
+
+      // --- 모든 요청 성공 ---
+      alert(`${actionResult.actionPerformed} 구입 완료!`);
+      setMoney(transactionResult.currentMoney); // 잔액 업데이트
+      onClose();
+
+    } catch (error: any) {
+      console.error('구입 실패:', error);
+      alert(error.message); // API 함수에서 throw된 에러 메시지를 표시
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -97,13 +201,24 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
                         : item.price);
 
                   return (
-                    <View key={item.id} style={styles.itemWrapper}>
-                      <Image source={item.image} style={styles.itemImage} />
-                      <MoneyStatus
-                        value={dynamicPrice}
-                        icon={require('@assets/icons/money.png')}
-                      />
-                    </View>
+                    <TouchableOpacity
+                      key={item.id}
+                      style={styles.itemWrapper}
+                      onPress={() => handleItemSelect(item.id)}
+                    >
+                      <Animated.View
+                        style={
+                          selectedLocalItemId === item.id && { transform: [{ scale: scaleAnim }] }
+                        }
+                      >
+                        <Image source={item.image} style={styles.itemImage} />
+                        <MoneyStatus
+                          value={dynamicPrice}
+                          icon={require('@assets/icons/money.png')}
+                          isSelected={selectedLocalItemId === item.id}
+                        />
+                      </Animated.View>
+                    </TouchableOpacity>
                   );
                 })}
               </View>
@@ -115,7 +230,7 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
           </View>
         </View>
       </View>
-    </Modal>
+    </Modal >
   );
 }
 
@@ -158,8 +273,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   itemWrapper: {
-    alignItems: 'center',
-    width: 80
+    alignItems: 'stretch', // default stretch
+    width: 80,
+  },
+  selectedItem: { // 선택된 아이템의 강조 효과
+    borderColor: '#ff0000ff', // 녹색 테두리
+    borderWidth: 3,
+    borderRadius: 10,
   },
   itemImage: {
     width: 80,

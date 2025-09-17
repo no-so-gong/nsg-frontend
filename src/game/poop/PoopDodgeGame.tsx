@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, ImageBackground } from 'react-native';
 import { MinigameProps } from '@/components/minigames/MinigameWrapper';
 import usePetStore from '@zustand/usePetStore';
 import { getAnimalImageByEvolutionStage } from '@/components/animalImages';
@@ -7,22 +7,22 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type GameObject = { id: string; x: number; y: number; sx: number; sy: number; move: number; image: any; };
 const createPlayer = (image?: any): GameObject => ({
-  id: 'player', 
-  x: SCREEN_WIDTH / 2 - 25, 
-  y: SCREEN_HEIGHT - 120, 
-  sx: 50, 
-  sy: 80, 
-  move: 10, 
+  id: 'player',
+  x: SCREEN_WIDTH / 2 - 25,
+  y: SCREEN_HEIGHT - 120,
+  sx: 50,
+  sy: 80,
+  move: 10,
   image: image ?? require('@assets/images/shiba_image6.png'), // 기본값
 });
 
-const createAlien = (difficulty: number): GameObject => ({ 
-  id: Math.random().toString(), 
-  x: Math.random() * (SCREEN_WIDTH - 40), 
-  y: 0, 
-  sx: 40, 
-  sy: 40, 
-  move: 3 + difficulty * 0.5, 
+const createAlien = (difficulty: number): GameObject => ({
+  id: Math.random().toString(),
+  x: Math.random() * (SCREEN_WIDTH - 40),
+  y: 0,
+  sx: 40,
+  sy: 40,
+  move: 3 + difficulty * 0.5,
   image: require('@assets/icons/poop.png')
 });
 
@@ -30,9 +30,9 @@ export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProp
   const storedPetImage = usePetStore(state => state.currentPetImage);
   const currentPetId = usePetStore(state => state.currentPetId);
   const currentPetEvolutionStage = usePetStore(state => state.currentPetEvolutionStage);
-  
-  const playerImage = storedPetImage || 
-    (currentPetId && currentPetEvolutionStage 
+
+  const playerImage = storedPetImage ||
+    (currentPetId && currentPetEvolutionStage
       ? getAnimalImageByEvolutionStage(currentPetId, currentPetEvolutionStage)
       : require('@assets/images/shiba_image6.png'));
   const [player, setPlayer] = useState<GameObject | null>(null);
@@ -44,7 +44,7 @@ export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProp
   const [isGameOver, setIsGameOver] = useState(false);
   const [showStartScreen, setShowStartScreen] = useState(true);
   const PLAYER_SCALE = 1.5;
-  
+
   const moveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const startGame = () => {
@@ -52,12 +52,12 @@ export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProp
     const p = createPlayer(playerImage);
     setPlayer(p);
     playerRef.current = p;
-      setAliens([]);
-      setDodgedCount(0);
-      setTime(0);
-      setIsGameOver(false);
-      setRunning(true);
-      setShowStartScreen(false);
+    setAliens([]);
+    setDodgedCount(0);
+    setTime(0);
+    setIsGameOver(false);
+    setRunning(true);
+    setShowStartScreen(false);
   };
 
   // 점수 업데이트
@@ -72,41 +72,41 @@ export default function PoopDodgeGame({ onGameEnd, onScoreUpdate }: MinigameProp
     playerRef.current = p;
   }, [playerImage]);
   // 게임 루프
-useEffect(() => {
-  if (!running) return;
-  const gameLoop = setInterval(() => {
-    const difficulty = Math.floor(time / 10);
-    const spawnRate = 0.98 - difficulty * 0.005;
-    setAliens(prevAliens => {
-      let currentAliens = prevAliens.map(a => ({ ...a, y: a.y + a.move }));
-      const survivedAliens = currentAliens.filter(a => a.y < SCREEN_HEIGHT);
-      const dodgedThisFrame = currentAliens.length - survivedAliens.length;
-      if (dodgedThisFrame > 0) setDodgedCount(prev => prev + dodgedThisFrame);
+  useEffect(() => {
+    if (!running) return;
+    const gameLoop = setInterval(() => {
+      const difficulty = Math.floor(time / 10);
+      const spawnRate = 0.98 - difficulty * 0.005;
+      setAliens(prevAliens => {
+        let currentAliens = prevAliens.map(a => ({ ...a, y: a.y + a.move }));
+        const survivedAliens = currentAliens.filter(a => a.y < SCREEN_HEIGHT);
+        const dodgedThisFrame = currentAliens.length - survivedAliens.length;
+        if (dodgedThisFrame > 0) setDodgedCount(prev => prev + dodgedThisFrame);
 
-      for (const alien of survivedAliens) {
-        const p = playerRef.current;
-        if (!p) continue; // p가 null이면 건너뜀
+        for (const alien of survivedAliens) {
+          const p = playerRef.current;
+          if (!p) continue; // p가 null이면 건너뜀
 
-        const playerWidth = p.sx * PLAYER_SCALE;
-        const playerHeight = p.sy * PLAYER_SCALE;
+          const playerWidth = p.sx * PLAYER_SCALE;
+          const playerHeight = p.sy * PLAYER_SCALE;
 
-        // 충돌 감지
-        const padding = 10;
-        if (
-          p.x + padding < alien.x + alien.sx - padding &&
-          p.x + playerWidth - padding > alien.x + padding &&
-          p.y + padding < alien.y + alien.sy - padding &&
-          p.y + playerHeight - padding > alien.y + padding
-        ) {
-          setRunning(false);
-          setIsGameOver(true);
-          setTimeout(() => onGameEnd(dodgedCount), 0);
-          return [];
+          // 충돌 감지
+          const padding = 10;
+          if (
+            p.x + padding < alien.x + alien.sx - padding &&
+            p.x + playerWidth - padding > alien.x + padding &&
+            p.y + padding < alien.y + alien.sy - padding &&
+            p.y + playerHeight - padding > alien.y + padding
+          ) {
+            setRunning(false);
+            setIsGameOver(true);
+            setTimeout(() => onGameEnd(dodgedCount), 0);
+            return [];
+          }
         }
-      }
 
-      return survivedAliens;
-    });
+        return survivedAliens;
+      });
 
       if (Math.random() > spawnRate) setAliens(prev => [...prev, createAlien(difficulty)]);
     }, 1000 / 60);
@@ -123,7 +123,7 @@ useEffect(() => {
     setPlayer(p => {
       if (!p) return p; // p가 null이면 아무것도 안함
       const newX = direction === 'left' ? p.x - p.move : p.x + p.move;
-      const maxX = SCREEN_WIDTH - p.sx * PLAYER_SCALE;  
+      const maxX = SCREEN_WIDTH - p.sx * PLAYER_SCALE;
       const clampedX = Math.min(Math.max(0, newX), maxX);
       const updated = { ...p, x: clampedX };
       playerRef.current = updated;
@@ -158,7 +158,11 @@ useEffect(() => {
   }
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('./assets/poopBackgroundV1.png')}
+      style={styles.container}
+      resizeMode="contain"
+    >
       {showStartScreen ? (
         <View style={styles.startScreen}>
           <Text style={styles.startText}>똥 피하기</Text>
@@ -169,21 +173,20 @@ useEffect(() => {
         </View>
       ) : (
         <>
-        <View style={styles.hudcontainer}>
-          <Text style={styles.hudLeft}>피한 똥: {dodgedCount}</Text>
-          <Text style={styles.hudRight}>시간: {time}</Text>
-        </View>
+          <View style={styles.hudcontainer}>
+            <Text style={styles.hudLeft}>피한 똥: {dodgedCount}</Text>
+            <Text style={styles.hudRight}>시간: {time}</Text>
+          </View>
 
-
-{player && (
-  <Image
-    source={player.image}
-    style={[styles.player, { left: player.x, top: player.y, width: player.sx * PLAYER_SCALE, height: undefined, aspectRatio: player.sx / player.sy }]}
-    resizeMode="contain"
-  />
-)}
+          {player && (
+            <Image
+              source={player.image}
+              style={[styles.player, { left: player.x, top: player.y, width: player.sx * PLAYER_SCALE, height: undefined, aspectRatio: player.sx / player.sy }]}
+              resizeMode="contain"
+            />
+          )}
           {aliens.map(a => <Image key={a.id} source={a.image} style={{ position: 'absolute', left: a.x, top: a.y, width: a.sx, height: a.sy }} />)}
-          
+
           {/* 좌우 버튼 */}
           <TouchableOpacity
             style={[styles.controlButton, styles.leftButton]}
@@ -202,30 +205,29 @@ useEffect(() => {
           </TouchableOpacity>
         </>
       )}
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: 'black' 
+  container: {
+    flex: 1,
   },
-  startScreen: { 
-    position: 'absolute', 
-    top: 0, 
-    left: 0, 
-    right: 0, 
-    bottom: 0, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
+  startScreen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.8)',
     paddingHorizontal: 40,
   },
-  startText: { 
-    fontSize: 32, 
-    fontWeight: 'bold', 
-    color: 'white', 
+  startText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: 'white',
     marginBottom: 10,
   },
   instructionText: {
@@ -234,54 +236,54 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 30,
   },
-  startButton: { 
-    backgroundColor: '#22c55e', 
-    paddingVertical: 12, 
-    paddingHorizontal: 24, 
-    borderRadius: 10 
+  startButton: {
+    backgroundColor: '#22c55e',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10
   },
-  startButtonText: { 
-    color: 'white', 
+  startButtonText: {
+    color: 'white',
     fontSize: 18,
-    fontWeight: 'bold' 
+    fontWeight: 'bold'
   },
 
   hudcontainer: {
-    flexDirection: 'row',   
-    alignItems: 'center',  
-    top: 50, 
+    flexDirection: 'row',
+    alignItems: 'center',
+    top: 50,
   },
   hudLeft: {
     marginRight: 16,
-     color: 'yellow', 
+    color: 'yellow',
     fontSize: 16,
-    fontWeight: 'bold'        
+    fontWeight: 'bold'
   },
   hudRight: {
-     color: 'yellow', 
+    color: 'yellow',
     fontSize: 16,
-    fontWeight: 'bold' 
+    fontWeight: 'bold'
   },
-  player: { 
-    position: 'absolute' 
+  player: {
+    position: 'absolute'
   },
-  gameOver: { 
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
+  gameOver: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'black',
     paddingHorizontal: 40,
   },
-  gameOverText: { 
-    fontSize: 36, 
-    color: 'red', 
-    fontWeight: 'bold', 
-    marginBottom: 20 
+  gameOverText: {
+    fontSize: 36,
+    color: 'red',
+    fontWeight: 'bold',
+    marginBottom: 20
   },
-  stats: { 
-    fontSize: 20, 
-    color: 'white', 
-    marginBottom: 10 
+  stats: {
+    fontSize: 20,
+    color: 'white',
+    marginBottom: 10
   },
   controlButton: {
     backgroundColor: '#1f2937',
@@ -290,11 +292,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
   },
-  leftButton: { 
-    left: 30 
+  leftButton: {
+    left: 30
   },
-  rightButton: { 
-    right: 30 
+  rightButton: {
+    right: 30
   },
   controlText: {
     color: 'white',
