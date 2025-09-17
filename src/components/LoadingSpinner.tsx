@@ -6,9 +6,8 @@ interface LoadingSpinnerProps {
   isVisible: boolean;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ isVisible }) => {  
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ isVisible }) => {
   const anim = useRef(new Animated.Value(0)).current;
-  if (!isVisible) return null; 
   useEffect(() => {
     Animated.loop(
       Animated.timing(anim, {
@@ -20,6 +19,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ isVisible }) => 
     ).start();
   }, [anim]);
 
+  if (!isVisible) return null;
+
   const translateX = anim.interpolate({
     inputRange: [0, 1],
     outputRange: [-100, 250], // 게이지가 다 차도록 250까지 함
@@ -30,7 +31,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ isVisible }) => 
       <View style={styles.container}>
         <View style={styles.titleWrapper}>
           <View style={styles.imageWrapper}>
-            <Bone style={styles.image}  width={60} height={60} />
+            <Bone style={styles.image} width={60} height={60} />
             <Text style={styles.titleText}>알림</Text>
           </View>
         </View>

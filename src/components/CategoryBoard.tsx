@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Modal, Image } from 'react-native';
 import BoneLabelSvg from './BoneLabelSvg';
 import CommonButton from './CommonButton';
 import MoneyStatus from './MoneyStatus';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
+import { LoadingSpinner } from './LoadingSpinner';
+import usePriceListStore from '@zustand/usePriceListStore';
+import useLoadingStore from '@zustand/useLoadingStore';
+import usePetStore from '@zustand/usePetStore';
 import Feed1 from "@assets/icons/feed1.png";
 import Feed2 from "@assets/icons/feed2.png";
 import Feed3 from "@assets/icons/feed3.png";
@@ -20,35 +24,47 @@ interface CategoryBoardProps {
   onClose: () => void;
 }
 
-// 가격 하드
+// 가격 하드(기본값) + label을 통해 서버 응답 키와 매칭
 const CATEGORY_ITEMS = {
   feed: [
-    { id: 1, image: Feed1, price: 30 },
-    { id: 2, image: Feed2, price: 40 },
-    { id: 3, image: Feed3, price: 50 },
+    { id: 1, image: Feed1, price: 30, label: '시장 사료' },
+    { id: 2, image: Feed2, price: 40, label: '마트 사료' },
+    { id: 3, image: Feed3, price: 50, label: '유기농 사료' },
   ],
   play: [
-    { id: 1, image: Play1, price: 30 },
-    { id: 2, image: Play2, price: 40 },
-    { id: 3, image: Play3, price: 50 },
+    { id: 1, image: Play1, price: 30, label: '산책 가기' },
+    { id: 2, image: Play2, price: 40, label: '공 놀이' },
+    { id: 3, image: Play3, price: 50, label: '애견 카페 가기' },
   ],
   gift: [
-    { id: 1, image: Gift1, price: 30 },
-    { id: 2, image: Gift2, price: 40 },
-    { id: 3, image: Gift3, price: 50 },
+    { id: 1, image: Gift1, price: 30, label: '장난감 사주기' },
+    { id: 2, image: Gift2, price: 40, label: '예쁜 옷 사주기' },
+    { id: 3, image: Gift3, price: 50, label: '유모차 사주기' },
   ],
 };
 
 export default function CategoryBoard({ category, onClose }: CategoryBoardProps) {
   const [categoryItems, setCategoryItems] = useState(CATEGORY_ITEMS[category]);
+  const fetchPrices = usePriceListStore(state => state.fetchPrices);
+  const pricesByCategory = usePriceListStore(state => state.pricesByCategory);
+  const isLoading = useLoadingStore(state => state.isLoading);
+  const currentPetId = usePetStore(state => state.currentPetId);
+  const currentPetEvolutionStage = usePetStore(state => state.currentPetEvolutionStage);
 
+  // 카테고리 또는 동물 변경 시 가격 목록 호출
   useEffect(() => {
     setCategoryItems(CATEGORY_ITEMS[category]);
   }, [category]);
 
+  useEffect(() => {
+    if (!currentPetId || !currentPetEvolutionStage) return;
+    // 캐시 우선 사용. 강제 새로고침이 필요하면 forceRefresh: true 전달
+    fetchPrices({ category, animalId: currentPetId, evolutionStage: currentPetEvolutionStage });
+  }, [category, currentPetId, currentPetEvolutionStage, fetchPrices]);
+
   const handlePurchase = () => {
     //상품 구입 API
-    onClose(); 
+    onClose();
   };
 
   return (
@@ -65,17 +81,33 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
             <View style={styles.boneWrapper}>
               <BoneLabelSvg label="상점" />
             </View>
-            <View style={styles.boardContainer}>
-              {categoryItems.map(item => (
-                <View key={item.id} style={styles.itemWrapper}>
-                  <Image source={item.image} style={styles.itemImage} />
-                  <MoneyStatus
-                    value={item.price}
-                    icon={require('@assets/icons/money.png')}
-                  />
-                </View>
-              ))}
-            </View>
+            {isLoading ? (
+              <LoadingSpinner isVisible={true} />
+            ) : (
+              <View style={styles.boardContainer}>
+                {categoryItems.map(item => {
+                  const prices = pricesByCategory[category];
+                  const labelKey = (item as any).label as string | undefined;
+                  const fallbackKey = `${category}${item.id}`; // 예: gift1, play2, feed3
+                  const dynamicPrice =
+                    (prices && labelKey !== undefined && prices[labelKey] !== undefined
+                      ? prices[labelKey]
+                      : prices && prices[fallbackKey] !== undefined
+                        ? prices[fallbackKey]
+                        : item.price);
+
+                  return (
+                    <View key={item.id} style={styles.itemWrapper}>
+                      <Image source={item.image} style={styles.itemImage} />
+                      <MoneyStatus
+                        value={dynamicPrice}
+                        icon={require('@assets/icons/money.png')}
+                      />
+                    </View>
+                  );
+                })}
+              </View>
+            )}
             <View style={styles.buttonRow}>
               <CommonButton label="구입" onPress={handlePurchase} />
               <CommonButton label="취소" onPress={onClose} />
