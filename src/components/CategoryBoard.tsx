@@ -23,7 +23,7 @@ import Gift3 from "@assets/icons/gift3.png";
 import useMoneyStore from '@zustand/useMoneyStore';
 import useUserStore from '@zustand/useUserStore';
 import { performCareAction } from '@/apis/cares';
-import { processTransaction } from '@/apis/users';
+import { getUserProperty } from '@/apis/users';
 import { calculateActionId } from 'utils/actionIdCalculator';
 import { getPetInfo } from '@/apis/pets';
 
@@ -132,13 +132,7 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
     const price = pricesByCategory[category]?.[fallbackKey] ?? selectedItemInfo.price;
 
     try {
-      // 2. processTransaction 함수로 결제 요청
-      const transactionResult = await processTransaction({
-        amount: -price,
-        source: 'care',
-      }, userId);
-
-      // 3. performCareAction 함수로 행동 요청W
+      // performCareAction 함수로 행동 요청
       const actionIdToSend = calculateActionId(
         category,
         selectedLocalItemId,
@@ -155,12 +149,15 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
         userId: userId
       });
 
+      // getUserProperty 함수로 현재 돈 조회 요청
+      const moneyGetResult = await getUserProperty(userId);
+
       // 최신 펫 정보로 전역 스토어를 업데이트합니다.
       setPetInfo(updatedPetInfo);
 
       // --- 모든 요청 성공 ---
       alert(`${actionResult.actionPerformed} 구입 완료!`);
-      setMoney(transactionResult.currentMoney); // 잔액 업데이트
+      setMoney(moneyGetResult.money); // 잔액 업데이트
       onClose();
 
     } catch (error: any) {
