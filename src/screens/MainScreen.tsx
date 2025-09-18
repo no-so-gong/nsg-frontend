@@ -17,6 +17,7 @@ import { getUserProperty } from '@/apis/users';
 import { getAnimalImageByEmotion } from '@/components/animalImages';
 import usePetStore from '@zustand/usePetStore';
 import useMoneyStore from '@zustand/useMoneyStore';
+import GameScreen from '@/game/GameScreen';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'>;
 
 // 펫의 기본 정의를 상수로 관리하여 확장성 확보
@@ -38,7 +39,7 @@ export default function MainScreen() {
   } = usePetStore();
 
   const [visibleModal, setVisibleModal] = useState<null | 'feed' | 'play' | 'gift'>(null);
-  const [visiblGameeModal, setVisibleGameModal] = useState<null | 'ddong' | 'tetris' | 'snake'>(null);
+  const [visibleGameModal, setVisibleGameModal] = useState<null | 'ddong' | 'tetris' | 'snake'>(null);
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
@@ -146,13 +147,15 @@ export default function MainScreen() {
               console.log("게임 버튼 클릭됨");
               const currentPet = pets[currentAnimalIndex];
               const emotion = currentPet.info?.currentEmotion ?? 0;
-              const actualDisplayedImage = getAnimalImageByEmotion(currentPet.id, Math.floor(emotion));
+              const actualDisplayedImage = getAnimalImageByEmotion(
+                currentPet.id,
+                Math.floor(emotion)
+              );
 
               setCurrentPetImage(actualDisplayedImage);
               setCurrentPetId(currentPet.id);
               setCurrentPetEvolutionStage(currentPet.info?.evolutionStage || 1);
-              // setVisibleGameModal();
-              navigation.navigate('GameScreen');
+              setVisibleGameModal('ddong');  // 기본 응아로
             }}
           />
           <SVGButton
@@ -230,6 +233,12 @@ export default function MainScreen() {
             <CategoryBoard
               category={visibleModal}
               onClose={() => setVisibleModal(null)}
+            />
+          )}
+          {visibleGameModal && (
+            <GameScreen
+              visible={!!visibleGameModal}
+              onClose={() => setVisibleGameModal(null)}
             />
           )}
         </View>

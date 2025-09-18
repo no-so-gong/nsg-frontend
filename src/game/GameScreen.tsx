@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import MinigameWrapper from '@/components/minigames/MinigameWrapper';
 import TetrisGame from '@/game/tetris/TetrisGame';
 import PoopDodgeGame from '@/game/poop/PoopDodgeGame';
 import SnakeGame from '@/game/snake/SnakeGame';
 import useUserStore from '@zustand/useUserStore';
+import CommonButton from '@/components/CommonButton';
+import BoneLabelSvg from '@/components/BoneLabelSvg';
 
-export default function GameScreen({ navigation }: any) {
+interface GameScreenProps {
+  visible: boolean;
+  onClose: () => void; 
+}
+
+export default function GameScreen({ visible, onClose }: GameScreenProps) {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const userId = useUserStore((state) => state.userId);
 
@@ -16,148 +23,153 @@ export default function GameScreen({ navigation }: any) {
   };
 
   return (
-    <ImageBackground
-      source={require('@assets/images/Main.png')}
-      style={styles.background}
-      resizeMode="cover"
+    <Modal
+      visible={visible}
+      transparent={true}
+      statusBarTranslucent
+      onRequestClose={onClose}
     >
-      {/* 뒤로가기 버튼 */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backButtonText}>← 뒤로</Text>
-      </TouchableOpacity>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.innerContainer}>
+            <View style={styles.boneWrapper}>
+              <BoneLabelSvg label="게임" />
+            </View>
+            {/* 게임 선택 화면 */}
+            {!selectedGame && (
+              <View style={styles.gameSelection}>
+                <View style={styles.gameGrid}>
+                  {/* 테트리스 */}
+                  <TouchableOpacity onPress={() => setSelectedGame('tetris')}>
+                    <ImageBackground
+                      source={require('../../assets/images/tetrisbk.png')}
+                      style={styles.gameButton}
+                      imageStyle={{ borderRadius: 15}}
+                    >
+                    </ImageBackground>
+                  </TouchableOpacity>
+                  {/* 응아! */}
+                  <TouchableOpacity onPress={() => setSelectedGame('poop')}>
+                    <ImageBackground
+                      source={require('../../assets/images/ddongbk.png')}
+                      style={styles.gameButton}
+                      imageStyle={{ borderRadius: 15 }}
+                    >
+                    </ImageBackground>
+                  </TouchableOpacity>
+                  {/* 뱀 */}
+                  <TouchableOpacity onPress={() => setSelectedGame('snake')}>
+                    <ImageBackground
+                      source={require('../../assets/images/snakebk.png')}
+                      style={styles.gameButton}
+                      imageStyle={{ borderRadius: 15 }}
+                    >
+                    </ImageBackground>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
 
-      {/* 게임 선택 화면 */}
-      <View style={styles.gameSelection}>
-        <Text style={styles.title}>미니게임</Text>
-        
-        <View style={styles.gameGrid}>
-          <TouchableOpacity
-            style={styles.gameButton}
-            onPress={() => setSelectedGame('tetris')}
-          >
-            <Text style={styles.gameButtonText}>🧱</Text>
-            <Text style={styles.gameButtonLabel}>테트리스</Text>
-          </TouchableOpacity>
+            {/* MinigameWrapper */}
+            <MinigameWrapper
+              userId={userId || ''}
+              gameName="tetris"
+              goldPerPoint={1}
+              visible={selectedGame === 'tetris'}
+              onClose={closeGame}
+            >
+              {(props) => <TetrisGame {...props} />}
+            </MinigameWrapper>
 
-          <TouchableOpacity
-            style={styles.gameButton}
-            onPress={() => setSelectedGame('poop')}
-          >
-            <Text style={styles.gameButtonText}>💩</Text>
-            <Text style={styles.gameButtonLabel}>똥 피하기</Text>
-          </TouchableOpacity>
+            <MinigameWrapper
+              userId={userId || ''}
+              gameName="poop_dodge"
+              goldPerPoint={2}
+              visible={selectedGame === 'poop'}
+              onClose={closeGame}
+            >
+              {(props) => <PoopDodgeGame {...props} />}
+            </MinigameWrapper>
 
-          <TouchableOpacity
-            style={styles.gameButton}
-            onPress={() => setSelectedGame('snake')}
-          >
-            <Text style={styles.gameButtonText}>🐍</Text>
-            <Text style={styles.gameButtonLabel}>스네이크</Text>
-          </TouchableOpacity>
+            <MinigameWrapper
+              userId={userId || ''}
+              gameName="snake"
+              goldPerPoint={1}
+              visible={selectedGame === 'snake'}
+              onClose={closeGame}
+            >
+              {(props) => <SnakeGame {...props} />}
+            </MinigameWrapper>
+
+            {/* 닫기 버튼 */}
+            <View style={styles.buttonRow}>
+              <CommonButton label="닫기" onPress={onClose} />
+            </View>
+          </View>
         </View>
       </View>
-
-      {/* 테트리스 게임 */}
-      <MinigameWrapper
-        userId={userId || ''}
-        gameName="tetris"
-        goldPerPoint={1}
-        visible={selectedGame === 'tetris'}
-        onClose={closeGame}
-      >
-        {(props) => <TetrisGame {...props} />}
-      </MinigameWrapper>
-
-      {/* 똥 피하기 게임 */}
-      <MinigameWrapper
-        userId={userId || ''}
-        gameName="poop_dodge"
-        goldPerPoint={2}
-        visible={selectedGame === 'poop'}
-        onClose={closeGame}
-      >
-        {(props) => <PoopDodgeGame {...props} />}
-      </MinigameWrapper>
-
-      {/* 스네이크 게임 */}
-      <MinigameWrapper
-        userId={userId || ''}
-        gameName="snake"
-        goldPerPoint={1}
-        visible={selectedGame === 'snake'}
-        onClose={closeGame}
-      >
-        {(props) => <SnakeGame {...props} />}
-      </MinigameWrapper>
-    </ImageBackground>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    zIndex: 10,
-    backgroundColor: 'rgba(203, 167, 78, 0.9)',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  backButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  gameSelection: {
+  overlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  title: {
-    fontSize: 36,
-    color: '#CBA74E',
-    fontWeight: 'bold',
-    marginBottom: 60,
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
+  container: {
+    backgroundColor: '#CBA74E',
+    borderRadius: SCREEN_WIDTH * 0.08,
+    padding: SCREEN_WIDTH * 0.03,
+    width: SCREEN_WIDTH * 0.88,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  innerContainer: {
+    backgroundColor: '#FFDD82',
+    borderRadius: SCREEN_WIDTH * 0.05,
+    padding: SCREEN_WIDTH * 0.04,
+    width: '100%',
+    alignItems: 'center',
+  },
+  boneWrapper: {
+    position: 'absolute',
+    top: -SCREEN_HEIGHT * 0.038,
+    left: SCREEN_WIDTH * 0.29,
+    zIndex: 10,
+  },
+
+  gameSelection: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+    
   },
   gameGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 30,
+    justifyContent: 'space-around',
+    width: '100%',
+    gap: 5,
   },
   gameButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    width: 120,
-    height: 120,
-    borderRadius: 20,
+    width: 90,
+    height: 90,
+    borderRadius: 15,
+    backgroundColor: 'rgba(203,167,78,0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
-  gameButtonText: {
-    fontSize: 40,
-    marginBottom: 8,
-  },
-  gameButtonLabel: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '600',
+  gameButtonText: { fontSize: 40 },
+  gameButtonLabel: { fontSize: 14, marginTop: 5, color: '#fff' },
+  buttonRow: { marginTop: 0 },
+  boardContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 10,
   },
 });
