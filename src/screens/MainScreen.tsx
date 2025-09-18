@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, ImageBackground, StyleSheet, Image, FlatList } from 'react-native';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import EmotionAffinityGauge from '@/components/EmotionAffinityGauge';
@@ -11,10 +10,9 @@ import SVGButton from '@/components/SVGButton';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigationTypes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import GameScreen from '@/game/GameScreen';
 import { useEffect, useState } from 'react';
 import useUserStore from '@zustand/useUserStore';
-import { getPetInfo, PetInfo } from '@/apis/pets';
+import { getPetInfo } from '@/apis/pets';
 import { getUserProperty } from '@/apis/users';
 import { getAnimalImageByEmotion } from '@/components/animalImages';
 import usePetStore from '@zustand/usePetStore';
@@ -40,6 +38,7 @@ export default function MainScreen() {
   } = usePetStore();
 
   const [visibleModal, setVisibleModal] = useState<null | 'feed' | 'play' | 'gift'>(null);
+  const [visiblGameeModal, setVisibleGameModal] = useState<null | 'ddong' | 'tetris' | 'snake'>(null);
 
   // 사용자 info
   const userId = useUserStore((state) => state.userId);
@@ -116,7 +115,7 @@ export default function MainScreen() {
           <View style={styles.leftGauge}>
             <EmotionAffinityGauge
               value={currentPetInfo?.currentEmotion ? Math.floor(currentPetInfo.currentEmotion) : 0}
-              icon={require('@assets/icons/heart.png')} // 현재 기분
+              icon={require('@assets/icons/hearts.png')} // 현재 기분
             />
           </View>
 
@@ -152,6 +151,7 @@ export default function MainScreen() {
               setCurrentPetImage(actualDisplayedImage);
               setCurrentPetId(currentPet.id);
               setCurrentPetEvolutionStage(currentPet.info?.evolutionStage || 1);
+              // setVisibleGameModal();
               navigation.navigate('GameScreen');
             }}
           />
