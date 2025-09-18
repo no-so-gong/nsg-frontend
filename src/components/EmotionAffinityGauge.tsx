@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, StyleSheet, Text, Image, ViewStyle } from 'react-native';
 import { SCREEN_WIDTH } from '@/constants/dimensions';
 import { LinearGradient } from 'expo-linear-gradient';
