@@ -62,7 +62,7 @@ export const getUserProperty = async (userId: string): Promise<UserPropertyRespo
   }
 };
 
-// 미완 
+// backend 개발 보류
 export const addUserMoney = async (userId: string, amount: number): Promise<UserPropertyResponse> => {
   try {
     const url = `${API_URL}${USER_BASE}/property/money`; // 디비에 이 사용자에게 이 정도의 골드를 제공해줘!!라고 요청하는 api
