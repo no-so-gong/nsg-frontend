@@ -18,6 +18,7 @@
         "./zustand/*"
       ],
     },
+    "resolveJsonModule": true,
     "esModuleInterop": true
   }
 }
