@@ -9,6 +9,9 @@ import { useFonts } from 'expo-font';
 import InitScreen from '@/screens/InitScreen';
 import MainScreen from '@/screens/MainScreen';
 import GameScreen from '@/game/GameScreen';
+import { EndingScreen } from '@/screens/EndingScreen';
+import { SafeAreaProvider } from 'react-native-safe-area-context'; // 1. Provider import 추가
+
 import useSplashStore from '@zustand/useSplashStore';
 import useLoadingStore from '@zustand/useLoadingStore';
 import useUserStore from '@zustand/useUserStore';
@@ -39,18 +42,33 @@ export default function App() {
   if (!fontsLoaded || isSplashShown) {
     return <SplashScreen />;
   }
-
   return (
-    <NavigationContainer>
-      <LoadingSpinner isVisible={isLoading} />
-      <Stack.Navigator initialRouteName="InitScreen" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="InitScreen" component={InitScreen} />
-        <Stack.Screen name="MainScreen" component={MainScreen} options={{ gestureEnabled: false }} />
-        <Stack.Screen name="GameScreen" component={GameScreen} options={{ gestureEnabled: false }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    // 2. NavigationContainer를 SafeAreaProvider로 감싸줍니다.
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <LoadingSpinner isVisible={isLoading} />
+        <Stack.Navigator initialRouteName="InitScreen" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="InitScreen" component={InitScreen} />
+          <Stack.Screen name="MainScreen" component={MainScreen} options={{ gestureEnabled: false }} />
+          <Stack.Screen name="GameScreen" component={GameScreen} options={{ gestureEnabled: false }} />
+          <Stack.Screen name="EndingScreen" component={EndingScreen} options={{ gestureEnabled: false }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
+  // return (
+  //   <NavigationContainer>
+  //     <LoadingSpinner isVisible={isLoading} />
+  //     <Stack.Navigator initialRouteName="InitScreen" screenOptions={{ headerShown: false }}>
+  //       <Stack.Screen name="InitScreen" component={InitScreen} />
+  //       <Stack.Screen name="MainScreen" component={MainScreen} options={{ gestureEnabled: false }} />
+  //       <Stack.Screen name="GameScreen" component={GameScreen} options={{ gestureEnabled: false }} />
+  //       <Stack.Screen name="EndingScreen" component={EndingScreen} options={{ gestureEnabled: false }} />
+  //     </Stack.Navigator>
+  //   </NavigationContainer>
+  // );
+// }
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center' },

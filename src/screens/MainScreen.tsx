@@ -18,6 +18,7 @@ import { getAnimalImageByEmotion } from '@/components/animalImages';
 import usePetStore from '@zustand/usePetStore';
 import useMoneyStore from '@zustand/useMoneyStore';
 import GameScreen from '@/game/GameScreen';
+import { EndingScreen } from './EndingScreen';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'>;
 
 // 펫의 기본 정의를 상수로 관리하여 확장성 확보
@@ -99,6 +100,21 @@ export default function MainScreen() {
 
     fetchMoney();
   }, [userId, setMoneyStore]);
+
+  // 엔딩부분
+  useEffect(() => {
+    const petDetails = Object.values(petsInfo);
+    if (petDetails.length < PET_DEFINITIONS.length) {
+      return;
+    }
+    const isGameEnd = petDetails.every(
+      (pet) => pet && pet.evolutionStage === 3
+    );
+    if (isGameEnd) {
+      console.log('게임 종료 조건 충족! 엔딩 화면으로 이동합니다.');
+      navigation.navigate('EndingScreen'); 
+    }
+  }, [petsInfo, navigation]); 
 
   return (
     <>
