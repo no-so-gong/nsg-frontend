@@ -13,7 +13,7 @@ import BoneLabelSvg from '../components/BoneLabelSvg';
 import useUserStore from '@zustand/useUserStore';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getEndingSummary, EndingSummaryData } from '../apis/ending';
+import { getEndingSummary, EndingSummaryData } from '../apis/endings';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 const { height, width } = Dimensions.get('window');
 
@@ -28,7 +28,7 @@ export const EndingScreen = () => {
   React.useEffect(() => {
     const fetchEndingData = async () => {
       if (!userId) {
-        setError('User ID not found.');
+        setError('User ID 찾을 수 없습니다.');
         setIsLoading(false);
         return;
       }

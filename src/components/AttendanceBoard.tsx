@@ -7,6 +7,7 @@ import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import { getAttendanceBoard, postAttendanceCheckin } from '@/apis/events';
 import type { AttendanceDay } from '@/apis/events';
 import useUserStore from '@zustand/useUserStore';
+import useMoneyStore from '@zustand/useMoneyStore';
 import { LoadingSpinner } from './LoadingSpinner';
 import axios from 'axios';
 
@@ -16,6 +17,7 @@ interface AttendanceBoardProps {
 
 export default function AttendanceBoard({ onClose }: AttendanceBoardProps) {
   const { userId } = useUserStore();
+  const addMoney = useMoneyStore(state => state.addMoney);
   const [board, setBoard] = useState<AttendanceDay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,7 +56,12 @@ export default function AttendanceBoard({ onClose }: AttendanceBoardProps) {
 
     try {
       const response = await postAttendanceCheckin(userId);
-      Alert.alert('출석 완료', `${response.data.todayReward.amount} 코인을 받았어요!`);
+      const rewardAmount = response.data.todayReward.amount;
+
+      // Zustand store 업데이트 (navbar 반영)
+      addMoney(rewardAmount);
+
+      Alert.alert('출석 완료', `${rewardAmount} 코인을 받았어요!`);
       onClose();
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
