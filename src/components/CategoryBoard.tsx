@@ -61,6 +61,7 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
 
   const userId = useUserStore(state => state.userId);
   const setMoney = useMoneyStore(state => state.setMoney);
+  const spendMoney = useMoneyStore(state => state.spendMoney);
 
   // 사용자가 선택한 아이템의 '로컬 ID'(1, 2, 3)를 저장할 상태 → Board 뜬 순서대로 1, 2, 3.
   const [selectedLocalItemId, setSelectedLocalItemId] = useState<number | null>(null);
@@ -156,8 +157,10 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
       setPetInfo(updatedPetInfo);
 
       // --- 모든 요청 성공 ---
+      // Zustand store 업데이트 (navbar 반영)
+      spendMoney(price);
+
       alert(`${actionResult.actionPerformed} 구입 완료!`);
-      setMoney(moneyGetResult.money); // 잔액 업데이트
       onClose();
 
     } catch (error: any) {

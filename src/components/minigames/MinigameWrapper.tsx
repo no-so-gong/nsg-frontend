@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Modal, Text, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
-import { addUserMoney } from '@/apis/users';
+import { processTransaction } from '@/apis/users';
+import useMoneyStore from '@zustand/useMoneyStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface MinigameProps {
@@ -31,13 +32,14 @@ export default function MinigameWrapper({
   const [totalGoldEarned, setTotalGoldEarned] = useState(0);
   const [gameEnded, setGameEnded] = useState(false);
   const [showGoldAnimation, setShowGoldAnimation] = useState(false);
-  
+
+  const addMoney = useMoneyStore(state => state.addMoney);
   const goldAnimationValue = useRef(new Animated.Value(0)).current;
   const goldScaleValue = useRef(new Animated.Value(0)).current;
 
   const handleGameEnd = async (score: number) => {
     const goldEarned = score * goldPerPoint;
-    
+
     setCurrentScore(score);
     setTotalGoldEarned(goldEarned);
     setGameEnded(true);
@@ -45,9 +47,19 @@ export default function MinigameWrapper({
     try {
       // 골드 지급 API 호출
       if (goldEarned > 0) {
-        // await addUserMoney(userId, goldEarned);
+        const response = await processTransaction(
+          {
+            amount: goldEarned,
+            source: `minigame-${gameName}`,
+          },
+          userId
+        );
+
         console.log(`${gameName} 게임 종료 - 점수: ${score}, 골드: ${goldEarned} 지급 완료`);
-        
+
+        // Zustand store 업데이트 (navbar 반영)
+        addMoney(goldEarned);
+
         // 골드 획득 애니메이션 시작
         startGoldAnimation();
       }
