@@ -31,18 +31,19 @@ export default function SettingsModal({ visible, onClose }: SettingsModalProps) 
           text: '초기화',
           style: 'destructive',
           onPress: async () => {
-            if (!userId) {
-              Alert.alert('오류', '사용자 정보를 찾을 수 없습니다.');
-              return;
-            }
-
             setIsResetting(true);
 
             try {
-              // 1. 백엔드 초기화 API 호출
-              await resetGame(userId);
+              // 1. 백엔드 초기화 API 호출 (userId가 있을 때만)
+              if (userId) {
+                try {
+                  await resetGame(userId);
+                } catch (error) {
+                  console.warn('백엔드 초기화 실패 (계속 진행):', error);
+                }
+              }
 
-              // 2. AsyncStorage 초기화
+              // 2. AsyncStorage 초기화 (항상 실행)
               await AsyncStorage.clear();
 
               // 3. 앱 재시작

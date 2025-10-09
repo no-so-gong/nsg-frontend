@@ -14,13 +14,14 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import CharacterNameModal from '@/components/CharacterNameModal';
-import { createUser } from '@/apis/users';
+import { createUser, getUserProperty } from '@/apis/users';
 import { registerNames } from '@/apis/pets';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import useUserStore from '@zustand/useUserStore';
 
 export default function InitScreen() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [hasValidated, setHasValidated] = useState(false);
   const opacity = useState(new Animated.Value(0.3))[0];
 
   type InitScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'InitScreen'>;
@@ -30,6 +31,7 @@ export default function InitScreen() {
 
   const userId = useUserStore((state) => state.userId);
   const setUserId = useUserStore((state) => state.setUserId);
+  const clearUserId = useUserStore((state) => state.clearUserId);
 
   useEffect(() => {
     Animated.loop(
@@ -50,10 +52,32 @@ export default function InitScreen() {
     ).start();
   }, [opacity]);
 
+  // 앱 시작 시 userId 유효성 검증 (한 번만 실행)
+  useEffect(() => {
+    const validateUserId = async () => {
+      if (userId && !hasValidated) {
+        try {
+          await getUserProperty(userId);
+          // 유효한 사용자 - 아무것도 하지 않음 (사용자가 클릭하면 MainScreen으로 이동)
+          setHasValidated(true);
+        } catch (error) {
+          // 유효하지 않은 사용자 - AsyncStorage 초기화
+          console.warn('저장된 userId가 유효하지 않음, 초기화:', error);
+          await clearUserId();
+          setHasValidated(true);
+        }
+      }
+    };
+
+    validateUserId();
+  }, [userId, hasValidated, clearUserId]);
+
   const handlePressAnywhere = () => {
     if (userId) {
+      // userId가 있으면 메인 화면으로 이동 (이미 useEffect에서 검증됨)
       navigation.navigate('MainScreen');
     } else if (!modalVisible) {
+      // userId가 없으면 회원가입 모달 표시
       setModalVisible(true);
     }
   };
