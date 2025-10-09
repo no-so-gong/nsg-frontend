@@ -68,6 +68,21 @@ export default function MainScreen() {
 
   const currentPetInfo = pets[currentAnimalIndex]?.info;
 
+  const isGameEnd = usePetStore((state) => {
+  const petDetails = Object.values(state.petsInfo);
+
+  if (petDetails.length < PET_DEFINITIONS.length) {
+    return false;
+  }
+  return petDetails.every(
+    (pet) =>
+      pet &&
+      pet.evolutionStage === 3 &&
+      pet.currentEmotion >= 100
+  );
+  });
+
+
   // 동물의 info에 정보 불러오기
   useEffect(() => {
     const fetchPetInfos = async () => {
@@ -106,20 +121,14 @@ export default function MainScreen() {
   }, [userId, setMoneyStore]);
 
   // 엔딩부분
+  // isGameEnd 값이 바뀔 때 화면을 전환하는 useEffect Hook을 배치
   useEffect(() => {
-    const petDetails = Object.values(petsInfo);
-    if (petDetails.length < PET_DEFINITIONS.length) {
-      return;
-    }
-    const isGameEnd = petDetails.every(
-      (pet) => pet && pet.evolutionStage === 3
-    );
     if (isGameEnd) {
       console.log('게임 종료 조건 충족! 엔딩 화면으로 이동합니다.');
-      navigation.navigate('EndingScreen'); 
+      navigation.navigate('EndingScreen');
     }
-  }, [petsInfo, navigation]); 
-
+  }, [isGameEnd, navigation]); 
+ 
   return (
     <>
       {isAttendanceVisible && (
