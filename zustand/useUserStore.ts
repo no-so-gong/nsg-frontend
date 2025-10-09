@@ -5,14 +5,21 @@ interface UserStore {
   userId: string | null;
   setUserId: (id: string) => Promise<void>;
   loadUserId: () => Promise<void>;
+  clearUserId: () => Promise<void>;
 }
 
 const useUserStore = create<UserStore>((set) => ({
   userId: null,
 
   setUserId: async (id: string) => {
-    await AsyncStorage.setItem('userId', id);
-    set({ userId: id });
+    if (id) {
+      await AsyncStorage.setItem('userId', id);
+      set({ userId: id });
+    } else {
+      // 빈 문자열이면 삭제
+      await AsyncStorage.removeItem('userId');
+      set({ userId: null });
+    }
   },
 
   loadUserId: async () => {
@@ -20,6 +27,11 @@ const useUserStore = create<UserStore>((set) => ({
     if (stored) {
       set({ userId: stored });
     }
+  },
+
+  clearUserId: async () => {
+    await AsyncStorage.removeItem('userId');
+    set({ userId: null });
   },
 }));
 
