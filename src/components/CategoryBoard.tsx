@@ -145,16 +145,20 @@ export default function CategoryBoard({ category, onClose }: CategoryBoardProps)
         action_id: actionIdToSend,
       }, userId);
 
-      const updatedPetInfo = await getPetInfo({
-        animalId: currentPetId,
-        userId: userId
-      });
+      // 세 동물 모두의 정보를 다시 가져옵니다 (편애도가 모두 변경되었을 수 있음)
+      const allUpdatedPetsInfo = await Promise.all([
+        getPetInfo({ animalId: 1, userId }),
+        getPetInfo({ animalId: 2, userId }),
+        getPetInfo({ animalId: 3, userId }),
+      ]);
 
       // getUserProperty 함수로 현재 돈 조회 요청
       const moneyGetResult = await getUserProperty(userId);
 
-      // 최신 펫 정보로 전역 스토어를 업데이트합니다.
-      setPetInfo(updatedPetInfo);
+      // 최신 펫 정보로 전역 스토어를 업데이트합니다 (모든 동물)
+      allUpdatedPetsInfo.forEach(petInfo => {
+        setPetInfo(petInfo);
+      });
 
       // --- 모든 요청 성공 ---
       // Zustand store 업데이트 (navbar 반영)
