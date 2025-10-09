@@ -5,3 +5,4 @@ export const PET_BASE = `${API_BASE}/pets`;
 export const EVENT_BASE = `${API_BASE}/events`;
 export const CARE_BASE = `${API_BASE}/cares`;
 export const ENDING_BASE = `${API_BASE}/endings`;
+export const MINIGAME_BASE = `${API_BASE}/minigames`;

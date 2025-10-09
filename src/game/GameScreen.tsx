@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, ImageBackground, Alert } from 'react-native';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
 import MinigameWrapper from '@/components/minigames/MinigameWrapper';
 import TetrisGame from '@/game/tetris/TetrisGame';
@@ -8,10 +8,11 @@ import SnakeGame from '@/game/snake/SnakeGame';
 import useUserStore from '@zustand/useUserStore';
 import CommonButton from '@/components/CommonButton';
 import BoneLabelSvg from '@/components/BoneLabelSvg';
+import { startMinigame } from '@/apis/minigames';
 
 interface GameScreenProps {
   visible: boolean;
-  onClose: () => void; 
+  onClose: () => void;
 }
 
 export default function GameScreen({ visible, onClose }: GameScreenProps) {
@@ -20,6 +21,30 @@ export default function GameScreen({ visible, onClose }: GameScreenProps) {
 
   const closeGame = () => {
     setSelectedGame(null);
+  };
+
+  // 게임 시작 전 플레이 가능 여부 체크
+  const handleGameSelect = async (gameName: string, gameId: number) => {
+    if (!userId) {
+      Alert.alert('알림', '사용자 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    try {
+      const response = await startMinigame(gameId, userId);
+      if (response.data.canPlay) {
+        // 플레이 가능하면 게임 시작
+        setSelectedGame(gameName);
+      } else {
+        // 플레이 불가능하면 알림만 표시
+        Alert.alert('알림', '오늘의 플레이 횟수를 모두 사용했습니다.\n(하루 횟수: 게임당 3회)');
+      }
+    } catch (error) {
+      console.error('게임 시작 체크 실패:', error);
+      const errorMessage = error instanceof Error ? error.message : '게임을 시작할 수 없습니다.';
+      // 에러 메시지에 횟수 정보 추가
+      Alert.alert('알림', `${errorMessage}\n(하루 횟수: 게임당 3회)`);
+    }
   };
 
   return (
@@ -39,17 +64,8 @@ export default function GameScreen({ visible, onClose }: GameScreenProps) {
             {!selectedGame && (
               <View style={styles.gameSelection}>
                 <View style={styles.gameGrid}>
-                  {/* 테트리스 */}
-                  <TouchableOpacity onPress={() => setSelectedGame('tetris')}>
-                    <ImageBackground
-                      source={require('../../assets/images/tetrisbk.png')}
-                      style={styles.gameButton}
-                      imageStyle={{ borderRadius: 15}}
-                    >
-                    </ImageBackground>
-                  </TouchableOpacity>
                   {/* 응아! */}
-                  <TouchableOpacity onPress={() => setSelectedGame('poop')}>
+                  <TouchableOpacity onPress={() => handleGameSelect('poop', 1)}>
                     <ImageBackground
                       source={require('../../assets/images/ddongbk.png')}
                       style={styles.gameButton}
@@ -57,8 +73,17 @@ export default function GameScreen({ visible, onClose }: GameScreenProps) {
                     >
                     </ImageBackground>
                   </TouchableOpacity>
+                  {/* 테트리스 */}
+                  <TouchableOpacity onPress={() => handleGameSelect('tetris', 2)}>
+                    <ImageBackground
+                      source={require('../../assets/images/tetrisbk.png')}
+                      style={styles.gameButton}
+                      imageStyle={{ borderRadius: 15 }}
+                    >
+                    </ImageBackground>
+                  </TouchableOpacity>
                   {/* 뱀 */}
-                  <TouchableOpacity onPress={() => setSelectedGame('snake')}>
+                  <TouchableOpacity onPress={() => handleGameSelect('snake', 3)}>
                     <ImageBackground
                       source={require('../../assets/images/snakebk.png')}
                       style={styles.gameButton}
@@ -70,9 +95,21 @@ export default function GameScreen({ visible, onClose }: GameScreenProps) {
               </View>
             )}
 
+            <MinigameWrapper
+              userId={userId || ''}
+              gameId={1}
+              gameName="poop_dodge"
+              goldPerPoint={2}
+              visible={selectedGame === 'poop'}
+              onClose={closeGame}
+            >
+              {(props) => <PoopDodgeGame {...props} />}
+            </MinigameWrapper>
+
             {/* MinigameWrapper */}
             <MinigameWrapper
               userId={userId || ''}
+              gameId={2}
               gameName="tetris"
               goldPerPoint={1}
               visible={selectedGame === 'tetris'}
@@ -83,16 +120,7 @@ export default function GameScreen({ visible, onClose }: GameScreenProps) {
 
             <MinigameWrapper
               userId={userId || ''}
-              gameName="poop_dodge"
-              goldPerPoint={2}
-              visible={selectedGame === 'poop'}
-              onClose={closeGame}
-            >
-              {(props) => <PoopDodgeGame {...props} />}
-            </MinigameWrapper>
-
-            <MinigameWrapper
-              userId={userId || ''}
+              gameId={3}
               gameName="snake"
               goldPerPoint={1}
               visible={selectedGame === 'snake'}
@@ -147,7 +175,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
-    
+
   },
   gameGrid: {
     flexDirection: 'row',
