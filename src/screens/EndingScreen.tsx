@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Image,
@@ -15,6 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getEndingSummary, EndingSummaryData } from '../apis/endings';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '@/constants/dimensions';
+import EndingModal from '@/components/EndingModal';
+
 const { height, width } = Dimensions.get('window');
 
 export const EndingScreen = () => {
@@ -24,6 +26,7 @@ export const EndingScreen = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const userId = useUserStore((state) => state.userId);
+  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
 
   React.useEffect(() => {
     const fetchEndingData = async () => {
@@ -45,7 +48,7 @@ export const EndingScreen = () => {
   }, [userId]);
 
   const handleRestart = () => {
-    console.log('Restart game');
+    setIsSettingsVisible(true);
   };
 
   if (isLoading) {
@@ -82,8 +85,8 @@ return (
           </View>
           
           <View style={styles.resultItem}>
-            <Text style={styles.resultText}>총 "{summaryData.totalUsedMoney}" 코인을 사용했어요</Text>
-          </View>
+            <Text style={styles.resultText}>총 "{Math.abs(summaryData.totalUsedMoney)}" 코인을 사용했어요</Text>          
+          </View> 
           
           <View style={styles.resultItem}>
             <Text style={styles.resultText}>
@@ -99,6 +102,13 @@ return (
           <TouchableOpacity style={styles.restartButton} onPress={handleRestart}>
             <Text style={styles.restartButtonText}>다시 키우기</Text>
           </TouchableOpacity>
+
+          {isSettingsVisible && (
+            <EndingModal
+              visible={isSettingsVisible}
+              onClose={() => setIsSettingsVisible(false)}
+            />
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -118,10 +128,12 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingTop: SCREEN_HEIGHT * 0.35,
   },
-  backgroundImage: {
+    backgroundImage: {
     position: 'absolute',
     width: width,
-    height: height,
+    height: height + 100, 
+    top: -20, 
+    resizeMode: 'cover',
   },
   contentOverlay: {
     flex: 1,
