@@ -6,6 +6,7 @@ import BoneLabelSvg from '@/components/BoneLabelSvg';
 import IconActionButton from '@/components/IconActionButton';
 import AttendanceBoard from '@/components/AttendanceBoard';
 import CategoryBoard from '@/components/CategoryBoard';
+import SettingsModal from '@/components/SettingsModal';
 import SVGButton from '@/components/SVGButton';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigationTypes';
@@ -51,6 +52,9 @@ export default function MainScreen() {
 
   // 상점 모달 상태
   const [isCategoryVisible, setIsCategoryVisible] = useState(true);
+
+  // 설정 모달 상태
+  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
 
   // 현재 렌더링 중인 동물 인덱스 상태
   const [currentAnimalIndex, setCurrentAnimalIndex] = useState(0);
@@ -105,6 +109,12 @@ export default function MainScreen() {
       {isAttendanceVisible && (
         <AttendanceBoard onClose={() => setIsAttendanceVisible(false)} />
       )}
+      {isSettingsVisible && (
+        <SettingsModal
+          visible={isSettingsVisible}
+          onClose={() => setIsSettingsVisible(false)}
+        />
+      )}
       <ImageBackground
         source={require('@assets/images/Main.png')}
         style={styles.background}
@@ -134,8 +144,16 @@ export default function MainScreen() {
           </View>
         </View>
 
-        {/* 유저 버튼 및 게임 버튼 */}
+        {/* 설정 및 게임 버튼 (좌측) */}
         <View style={[styles.userGameWrapper, { zIndex: 10 }]}>
+          <SVGButton
+            iconName="cog"
+            iconSize={30}
+            iconColor="#fff"
+            backgroundColor="#CBA74E"
+            style={{ width: 50, height: 50, marginLeft: -15 }}
+            onPress={() => setIsSettingsVisible(true)}
+          />
           <SVGButton
             iconName="gamepad-variant"
             iconSize={30}
@@ -277,7 +295,7 @@ const styles = StyleSheet.create({
   },
   userGameWrapper: {
     position: 'absolute',
-    top: 140,
+    top: 110,
     left: 24,
     alignItems: 'center',
     gap: 20,
