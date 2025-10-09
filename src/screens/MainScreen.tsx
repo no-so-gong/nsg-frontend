@@ -25,8 +25,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainScreen'
 // 펫의 기본 정의를 상수로 관리하여 확장성 확보
 const PET_DEFINITIONS = [
   { id: 1, defaultImage: require('@assets/images/shiba_image4.png') },
-  { id: 2, defaultImage: require('@assets/images/duck_image4.png') },
-  { id: 3, defaultImage: require('@assets/images/chick_image4.png') },
+  { id: 2, defaultImage: require('@assets/images/chick_image4.png') },
+  { id: 3, defaultImage: require('@assets/images/duck_image4.png') },
 ];
 
 export default function MainScreen() {
@@ -69,17 +69,17 @@ export default function MainScreen() {
   const currentPetInfo = pets[currentAnimalIndex]?.info;
 
   const isGameEnd = usePetStore((state) => {
-  const petDetails = Object.values(state.petsInfo);
+    const petDetails = Object.values(state.petsInfo);
 
-  if (petDetails.length < PET_DEFINITIONS.length) {
-    return false;
-  }
-  return petDetails.every(
-    (pet) =>
-      pet &&
-      pet.evolutionStage === 3 &&
-      pet.currentEmotion >= 100
-  );
+    if (petDetails.length < PET_DEFINITIONS.length) {
+      return false;
+    }
+    return petDetails.every(
+      (pet) =>
+        pet &&
+        pet.evolutionStage === 3 &&
+        pet.currentEmotion >= 100
+    );
   });
 
 
@@ -127,8 +127,8 @@ export default function MainScreen() {
       console.log('게임 종료 조건 충족! 엔딩 화면으로 이동합니다.');
       navigation.navigate('EndingScreen');
     }
-  }, [isGameEnd, navigation]); 
- 
+  }, [isGameEnd, navigation]);
+
   return (
     <>
       {isAttendanceVisible && (
